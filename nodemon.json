@@ -1,0 +1,12 @@
+{   
+    "verbose": false,
+    "ignore": [
+      "ctl",
+      "views/*",
+      "README.md",
+      "LICENSE",
+      "patiobar.sh",
+      "eventcmd.sh",
+      "install.sh"
+    ] 
+}

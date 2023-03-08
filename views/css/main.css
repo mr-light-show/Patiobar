@@ -6,6 +6,23 @@ body {
 #controls {
 }
 
+.hidden-controls {
+	display: none;
+}
+
+.col-container {
+    display: table; /* Make the container element behave like a table */
+    width: 100%; /* Set full-width to expand the whole page */
+}
+
+.col {
+    display: table-cell; /* Make elements inside the container behave like table cells */
+}
+.col-right {
+    display: table-cell; /* Make elements inside the container behave like table cells */
+    text-align: right;
+}
+
 #details {
 	margin:10px 0;
 	padding:0 40px;
@@ -16,10 +33,16 @@ body {
 	font-size:130%;
 }
 
-#albumartist {
-	color: orange;
+#artist {
+	color: #428bca;
 	font-style: italic;
 	font-size:110%;
+}
+
+#album {
+    color: #2e8f43;
+    font-style: normal;
+    font-size:90%;
 }
 
 #player {
@@ -32,4 +55,9 @@ body {
 #stations button {
  margin-left: 1px;
  margin-right: 1px;
+}
+
+.process {
+	color: orange;
+	font-size:130%;
 }

@@ -1,9 +1,14 @@
 {
-  "name": "Patiobar",
-  "version": "1.0.0",
+  "name": "patiobar",
+  "version": "1.0.1",
   "description": "A web frontend for pianobar, which is a CLI frontend for Pandora.",
   "dependencies": {
-    "express": "^4.17.1",
-    "socket.io": "2.4.0"
+    "console-stamp": ">=0.2.6",
+    "express": "4.17.1",
+    "socket.io": "2.4.0",
+    "util": ">=0.11.0"
+  },
+  "devDependancies": {
+    "nodemon": "*"
   }
 }

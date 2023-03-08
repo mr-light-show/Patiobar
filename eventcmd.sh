@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 host="http://127.0.0.1"
-port=3000
+port="${PATIOBAR_PORT}"
 baseurl="${host}:${port}"
 
 
@@ -48,10 +48,10 @@ stationList () {
 
 case "$1" in
 	songstart)
-		query="/start/?title=${title}&artist=${artist}&coverArt=${coverArt}&album=${album}&rating=${rating}&stationName=${stationName}"
+		query="/start/?title=${title}&artist=${artist}&coverArt=${coverArt}&album=${album}&rating=${rating}&stationName=${stationName}&songStationName=${songStationName}"
 		clean "$query"
 
-		echo -n "${artist},,,${title},,,${album},,,${coverArt},,,${rating},,,${stationName}" > "$currentSong"
+		echo -n "${artist},,,${title},,,${album},,,${coverArt},,,${rating},,,${stationName},,,${songStationName},,,end" > "$currentSong"
 
 		stationList
 		;;
