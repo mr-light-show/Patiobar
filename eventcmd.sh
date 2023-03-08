@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 host="http://127.0.0.1"
-port="${PATIOBAR_PORT}"
+port=80
 baseurl="${host}:${port}"
 
 

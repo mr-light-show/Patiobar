@@ -15,6 +15,7 @@ require('console-stamp')(console, {
 	}
 });
 
+var inactivity = 0;
 const
 	express = require('express'),
 	app = require('express')(),
@@ -59,8 +60,8 @@ function readCurrentSong() {
 
 	if (currentSong) {
 		var a = currentSong.split(',,,');
-			if (a[0] === 'PIANOBAR_STOPPED') {
-		 return (songTemplate);
+		if (a[0] === 'PIANOBAR_STOPPED') {
+			return (songTemplate);
 		} else {
 			return ({ artist: a[0], title: a[1], album: a[2], coverArt: a[3], rating: a[4], stationName: a[5], songStationName: a[6], isplaying: isPianobarPlaying() , isrunning: isPianobarRunning()});
 		}
@@ -128,15 +129,15 @@ function ProcessCTL(action) {
 			stationName: '', songStationName: '', isplaying: false, isrunning: false };
 	switch(action) {
 		case 'start':
-			if (isPianobarRunning()) {
+			if (!isPianobarRunning()) {
+				console.info('Starting Pianobar');
+				// pianobar starts in the running state, unless work is done to force it otherwise
+				// but wait for the first start message to change the playing from false to true
+				var songStatus = Object.assign(songTemplate, { title: 'Warming up', isplaying: false, isrunning: false});
+				io.emit('start', songStatus);
+			} else {
 				console.info('Pianobar is already running');
-				return;
 			}
-			console.info('Starting Pianobar');
-			// pianobar starts in the running state, unless work is done to force it otherwise
-			// but wait for the first start message to change the playing from false to true
-			var songStatus = Object.assign(songTemplate, { title: 'Warming up', isplaying: false, isrunning: false});
-			io.emit('start', songStatus);
 
 			try {
 				// minimize any junk commands introduced while system was offline
@@ -326,6 +327,7 @@ io.on('connection', function(socket) {
 		io.emit('stations', readStations() );
 		io.emit('start', { artist: artist, title: title,  album: album, coverArt: coverArt,rating: rating, stationName: stationName, songStationName: songStationName, isplaying: isPianobarPlaying(), isrunning: isPianobarRunning() });
 		if (!isPianobarPlaying()) PidoraCTL('S');  // if paused, stay paused after station change
+		inactivity = 0;
 		response.send(request.query);
 	});
 
@@ -360,7 +362,21 @@ function exitHandler(options, err) {
 		console.info('Caught interrupt signal');
 		setTimeout(function() {process.exit();}, 5000);
 	}
-};
+}; 
+
+function inactivityTracker() {
+	inactivity ++;
+	console.info("inactivity="+inactivity);
+	if (inactivity >= 90) { // 90 minutes
+		if (inactivity <= 92) { // try to stop 3 times
+			ProcessCTL('stop');
+		} else {
+			inactivity = 100000;
+		}
+	}
+}
+
+setInterval(inactivityTracker, 1000 * 60); // once a second.
 
 process.on('exit', exitHandler.bind(null,{cleanup:true}));
 
