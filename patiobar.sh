@@ -117,7 +117,7 @@ case "$1" in
   system-stop)
         # there are some bugs around not sending wall messages
         # if patiobar users should have this power, then uncomment the sudo line
-#        sudo shutdown now # although pi doesn't really power off...
+        sudo shutdown now # although pi doesn't really power off...
         exit 0   # if line above is uncommented, this will never be reached.
         ;;
   system-reboot)

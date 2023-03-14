@@ -148,7 +148,7 @@ function StationController($scope, socket) {
 function SongController($scope, socket) {
 	socket.on('start', function(msg) {
 		var aa = msg.artist;
-		$scope.artist = (!aa) ? 'Music should start soon.' : aa;
+		$scope.artist = (!aa) ? ((msg.isRunning) ? 'Music should start soon.' : '^^ Press power ^^') : aa;
 		$scope.album = (!aa) ? '' : msg.album;
 		$scope.songStationName = (!aa || !msg.songStationName) ? '' : NormalizeStationName(msg.songStationName);
 		$scope.src = (msg.coverArt) ? msg.coverArt : '/images/no-art.png';

@@ -120,7 +120,20 @@ function PidoraCTL(action) {
 				}
 			}
 		});
-	});
+	})
+	// if only pianobar supported more events....
+	// right now this just provides some extra logic around play/pause
+	// of course if pianobar is controlled directly (outside of patiobar),
+	// this extra handling does not get called, and the logic fails...
+	switch (action) {
+		case 'S' :
+			fs.closeSync(fs.openSync(pausePlayTouchFile, 'a')); // touch the pause file
+			break;
+		case 'P' :
+			// Do not care about errors (particularly file didn't exist)
+			fs.unlink(pausePlayTouchFile, () => {});  // is there a need for (err)
+			break;
+	}
 }
 
 function ProcessCTL(action) {
@@ -133,7 +146,7 @@ function ProcessCTL(action) {
 				console.info('Starting Pianobar');
 				// pianobar starts in the running state, unless work is done to force it otherwise
 				// but wait for the first start message to change the playing from false to true
-				var songStatus = Object.assign(songTemplate, { title: 'Warming up', isplaying: false, isrunning: false});
+				var songStatus = Object.assign(songTemplate, { title: 'Warming up', artist: ' ', isplaying: false, isrunning: false});
 				io.emit('start', songStatus);
 			} else {
 				console.info('Pianobar is already running');
@@ -228,22 +241,6 @@ function readStations() {
 	return {'stations': list};
 }
 
-// if only pianobar supported more events....
-// right now this just provides some extra logic around play/pause
-// of course if pianobar is controlled directly (outside of patiobar),
-// this extra handling does not get called, and the logic fails...
-function eventcmd_extension (action) {
-	switch (action) {
-		case 'S' :
-			fs.closeSync(fs.openSync(pausePlayTouchFile, 'a')); // touch the pause file
-			break;
-		case 'P' :
-			// Do not care about errors (particularly file didn't exist)
-			fs.unlink(pausePlayTouchFile, () => {});  // is there a need for (err)
-			break;
-	}
-}
-
 var socketlist = [];
 io.on('connection', function(socket) {
 	// remotePort is often Wrong (or at least seemed to be with old library)
@@ -305,7 +302,6 @@ io.on('connection', function(socket) {
 		// rebroadcast changes so all clients know the action was taken
 		io.emit('action', { action: action});
 		PidoraCTL(action);
-		eventcmd_extension(action);
 	});
 
 	socket.on('changeStation', function (data) {
@@ -325,8 +321,8 @@ io.on('connection', function(socket) {
 		var stationName = request.query.stationName;
 		var songStationName = request.query.songStationName;
 		io.emit('stations', readStations() );
+		if (!isPianobarPlaying()) PidoraCTL('P');  // if paused, start playing
 		io.emit('start', { artist: artist, title: title,  album: album, coverArt: coverArt,rating: rating, stationName: stationName, songStationName: songStationName, isplaying: isPianobarPlaying(), isrunning: isPianobarRunning() });
-		if (!isPianobarPlaying()) PidoraCTL('S');  // if paused, stay paused after station change
 		inactivity = 0;
 		response.send(request.query);
 	});
