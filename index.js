@@ -28,7 +28,13 @@ const
 	listenPort = 80,
 
         //patiobarCtl    = process.env.PIANOBAR_START  || process.env.HOME + '/Patiobar/patiobar.sh',
-	patiobarCtl    = process.env.HOME + '/Patiobar/patiobar.sh',
+	patiobarCtl	= process.env.HOME + '/Patiobar/patiobar.sh',
+	volumeGetCtl	= "/usr/bin/amixer sget 'Digital'",
+	volumeSetCtl    = "/usr/bin/amixer sset 'Digital' ",
+	volumeRegEx		= /Front Left: Playback (\d+)/,
+	volumeMax 		= 175,
+	volumeMin 		= 0,
+
 	//pianobarStart  = process.env.PIANOBAR_START  || process.env.HOME + '/Patiobar/patiobar.sh start',
 	//pianobarStop   = process.env.PIANOBAR_STOP   || process.env.HOME + '/Patiobar/patiobar.sh stop-pianobar',
 	//pianobarStatus = process.env.PIANOBAR_STATUS || process.env.HOME + '/Patiobar/patiobar.sh status-pianobar',
@@ -91,8 +97,49 @@ function clearFIFO() {
 //	})
 //}
 
+function volume(action) {
+	var volume = 150;
+	try {
+		var get_volume = child_process.execSync(volumeGetCtl).toString();
+//console.info("getVolume: "+get_volume);
+		var match = get_volume.match(volumeRegEx);
+		if (match) {
+			volume = parseInt(match[1],10);
+		}
+	} catch (err) {
+  		console.error('Error: ' + err.toString());
+	}
+	switch (action) {
+		case 'up':
+			if (volume <= volumeMax) {
+				get_volume = child_process.execSync(volumeSetCtl+" 1%+").toString();
+			}
+			break;
+		case 'down':
+			if( volume >= volumeMin) {
+				get_volume = child_process.execSync(volumeSetCtl+" 1%-").toString();
+			}
+			break;
+	}
+	console.info("getVolume: "+get_volume);
+	var match = get_volume.match(volumeRegEx);
+	if (match) {
+		volume = parseInt(match[1],10);
+	}
+	io.emit('volume', volume);
+}
 
 function PidoraCTL(action) {
+	switch (action) {
+	case '(':
+		volume('down');
+		console.error('volume down');
+		return;
+	case ')':
+		volume('up')
+		console.error('volume up');
+		return;
+	}
 	// this might be a blocking write, which is problematic if patiobar is not reading...
 	fs.open(fifo, 'w', '0644', function(error, fd) {
 		if (error) {
