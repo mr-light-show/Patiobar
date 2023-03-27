@@ -185,6 +185,10 @@ function SongController($scope, socket) {
 		$scope.rating = 0;
 	});
 
+	socket.on('volume', function(msg){
+		$scope.volume = msg.volume;
+	});
+
 	socket.on('action', function(msg) {
 		var action = msg.action;
 		switch(action) {

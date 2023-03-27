@@ -97,6 +97,12 @@ function clearFIFO() {
 //	})
 //}
 
+function pctVol(vol) {
+	var rel = vol - volumeMin;
+	var range = volumeMax - volumeMin;
+    var pct = ((rel / range) * 100) | 0;
+	return Math.max(0,Math.min(100,pct));
+}
 function volume(action) {
 	var volume = 150;
 	try {
@@ -120,26 +126,18 @@ function volume(action) {
 				get_volume = child_process.execSync(volumeSetCtl+" 1%-").toString();
 			}
 			break;
+		case 'get':
+			return {'volume': pctVol(volume)};
 	}
 	console.info("getVolume: "+get_volume);
 	var match = get_volume.match(volumeRegEx);
 	if (match) {
 		volume = parseInt(match[1],10);
 	}
-	io.emit('volume', volume);
+	return {'volume': pctVol(volume)};
 }
 
 function PidoraCTL(action) {
-	switch (action) {
-	case '(':
-		volume('down');
-		console.error('volume down');
-		return;
-	case ')':
-		volume('up')
-		console.error('volume up');
-		return;
-	}
 	// this might be a blocking write, which is problematic if patiobar is not reading...
 	fs.open(fifo, 'w', '0644', function(error, fd) {
 		if (error) {
@@ -309,6 +307,7 @@ io.on('connection', function(socket) {
 
 	socket.emit('start', readCurrentSong());
 	socket.emit('stations', readStations());
+	socket.emit('volume', volume('get'));
 
 	socket.on('disconnect', function(){
 		console.info('User disconnected (client closed)', user_id);
@@ -337,6 +336,8 @@ io.on('connection', function(socket) {
 			case 'allStations' :
 				socket.emit('query', readStations());
 				break;
+			case 'volume' :
+				socket.emit('volume', volume('get'));
 			case '*' :
 				console.warn('Unknown request');
 				break;
@@ -348,6 +349,16 @@ io.on('connection', function(socket) {
 		var action = data.action.substring(0, 1);
 		// rebroadcast changes so all clients know the action was taken
 		io.emit('action', { action: action});
+		switch (action) {
+		case '(':
+			io.emit('volume', volume('down'));
+			console.info('volume down');
+			return;
+		case ')':
+			io.emit('volume', volume('up'));
+			console.info('volume up');
+			return;
+		}		
 		PidoraCTL(action);
 	});
 
