@@ -32,7 +32,7 @@ const
 	volumeGetCtl	= "/usr/bin/amixer sget 'Digital'",
 	volumeSetCtl    = "/usr/bin/amixer sset 'Digital' ",
 	volumeRegEx		= /Front Left: Playback (\d+)/,
-	volumeMax 		= 175,
+	volumeMax 		= 165,
 	volumeMin 		= 0,
 
 	//pianobarStart  = process.env.PIANOBAR_START  || process.env.HOME + '/Patiobar/patiobar.sh start',
@@ -104,10 +104,9 @@ function pctVol(vol) {
 	return Math.max(0,Math.min(100,pct));
 }
 function volume(action) {
-	var volume = 150;
+	var volume = volumeMax;
 	try {
 		var get_volume = child_process.execSync(volumeGetCtl).toString();
-//console.info("getVolume: "+get_volume);
 		var match = get_volume.match(volumeRegEx);
 		if (match) {
 			volume = parseInt(match[1],10);
@@ -358,7 +357,7 @@ io.on('connection', function(socket) {
 			io.emit('volume', volume('up'));
 			console.info('volume up');
 			return;
-		}		
+		}
 		PidoraCTL(action);
 	});
 
@@ -416,7 +415,7 @@ function exitHandler(options, err) {
 		console.info('Caught interrupt signal');
 		setTimeout(function() {process.exit();}, 5000);
 	}
-}; 
+};
 
 function inactivityTracker() {
 	inactivity ++;
