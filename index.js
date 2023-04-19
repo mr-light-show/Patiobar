@@ -32,7 +32,7 @@ const
 	volumeGetCtl	= "/usr/bin/amixer sget 'Digital'",
 	volumeSetCtl    = "/usr/bin/amixer sset 'Digital' ",
 	volumeRegEx		= /Front Left: Playback (\d+)/,
-	volumeMax 		= 165,
+	volumeMax 		= 175,
 	volumeMin 		= 0,
 
 	//pianobarStart  = process.env.PIANOBAR_START  || process.env.HOME + '/Patiobar/patiobar.sh start',

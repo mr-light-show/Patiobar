@@ -8,10 +8,10 @@ PATIOBAR_DIR=~khawes/Patiobar
 case "$1" in
   startup)
 	# used on startup
-#	echo  Pianobar startup...
+	echo  Pianobar startup...
 	sleep 5
-#	hostname
-#	hostname -I
+	hostname
+	hostname -I
 	$0 start-patiobar >dev/null
 	exit 0
 	;;
@@ -52,7 +52,7 @@ case "$1" in
         EXITSTATUS=0
         pushd . > /dev/null
         cd $PIANOBAR_DIR
-        [[ 2 -eq $(ps ax | grep -c [p]ianobar) ]] || $PIANOBAR_BIN > /dev/null & 
+        [[ 2 -eq $(ps ax | grep -c [p]ianobar) ]] || $PIANOBAR_BIN > /dev/null &
         cd $PATIOBAR_DIR
 #        [[ 1 -eq $(ps aux | grep -v grep | grep -c index.js) ]] || nodemon index.js
         [[ 2 -eq $(ps ax | grep -c nano patiobar) ]] && pkill -f "nano"
