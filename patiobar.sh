@@ -12,7 +12,7 @@ case "$1" in
 	sleep 5
 	hostname
 	hostname -I
-	$0 start-patiobar >dev/null
+	$0 start-patiobar > /dev/null
 	exit 0
 	;;
 
