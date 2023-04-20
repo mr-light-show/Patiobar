@@ -32,8 +32,8 @@ const
 	volumeGetCtl	= "/usr/bin/amixer sget 'Digital'",
 	volumeSetCtl    = "/usr/bin/amixer sset 'Digital' ",
 	volumeRegEx		= /Front Left: Playback (\d+)/,
-	volumeMax 		= 175,
-	volumeMin 		= 0,
+	volumeMax 		= 190,
+	volumeMin 		= 70,
 
 	//pianobarStart  = process.env.PIANOBAR_START  || process.env.HOME + '/Patiobar/patiobar.sh start',
 	//pianobarStop   = process.env.PIANOBAR_STOP   || process.env.HOME + '/Patiobar/patiobar.sh stop-pianobar',
@@ -127,6 +127,11 @@ function volume(action) {
 			break;
 		case 'get':
 			return {'volume': pctVol(volume)};
+		case '50':
+			var half =  " " + (Math.floor((volumeMax - volumeMin) / 2)+volumeMin);
+			//console.info("half:"+half+" ,max-min:"+((Math.floor(volumeMax-volumeMin)/2)+volumeMin)+", max:"+volumeMax+", min:"+volumeMin);
+			//process.exit();
+		  get_volume = child_process.execSync(volumeSetCtl+half).toString();
 	}
 	console.info("getVolume: "+get_volume);
 	var match = get_volume.match(volumeRegEx);
@@ -447,5 +452,6 @@ process.on('SIGHUP', function() {
 	});
 });
 console.info(patiobarCtl);
+volume("50");
 // start the server after all other code is in place
 server.listen(listenPort);
