@@ -42,7 +42,7 @@ case "$1" in
         pushd . > /dev/null
         cd $PATIOBAR_DIR
         pb_pid=$(ps -ef | grep "[n]ode index.js patiobar" | tr -s ' ' | cut -d ' ' -f2)
-        [[ "$pb_pid" -eq "" ]] && echo starting patiobar && ($NODE_BIN index.js patiobar > nano.out 2>&1 &)
+        [[ "$pb_pid" -eq "" ]] && echo starting patiobar && ($NODE_BIN index.js patiobar > /dev/null 2>&1 &)
         EXITSTATUS=$(($? + $EXITSTATUS))
         popd > /dev/null
         exit "$EXITSTATUS"
