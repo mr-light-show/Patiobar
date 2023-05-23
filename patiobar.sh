@@ -108,6 +108,8 @@ case "$1" in
         pb_pid=$(pidof pianobar)
         EXITSTATUS=$([[ "$pb_pid" -eq "" ]] && echo 0 || echo 1)
         [[ $EXITSTATUS  -eq 0 ]] || echo pianobar is running - $pb_pid
+        cat $PIANOBAR_DIR/.config/pianobar/currentSong
+        echo ""
         exit $EXITSTATUS
         ;;
   status-pianobar)

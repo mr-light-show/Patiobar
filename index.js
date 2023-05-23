@@ -17,6 +17,7 @@ require('console-stamp')(console, {
 
 var inactivity = 0;
 const
+  inactivityThreshold = 30, // minutes
 	express = require('express'),
 	app = require('express')(),
 	server = require('http').createServer(app),
@@ -221,10 +222,8 @@ function ProcessCTL(action) {
 				return;
 			}
 			console.info('Stopping Pianobar');
-			//		try {
-			clearFIFO();
-			PidoraCTL('q');
-			fs.writeFile(currentSongFile, 'PIANOBAR_STOPPED,,,,', function (err) {
+			ProcessCTL('stop-pianobar');
+  		fs.writeFile(currentSongFile, 'PIANOBAR_STOPPED,,,,', function (err) {
 				if (err) {
 					console.error(err);
 					return;
@@ -425,9 +424,9 @@ function exitHandler(options, err) {
 function inactivityTracker() {
 	inactivity ++;
 	console.info("inactivity="+inactivity);
-	if (inactivity >= 90) { // 90 minutes
-		if (inactivity <= 92) { // try to stop 3 times
-			ProcessCTL('stop');
+	if (inactivity >= inactivityThreshold) { 
+		if (inactivity <= (inactivityThreshold + 2)) { // try to stop 3 times
+			ProcessCTL('stop-pianobar');
 		} else {
 			inactivity = 100000;
 		}
