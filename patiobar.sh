@@ -5,6 +5,18 @@ PIANOBAR_BIN=/usr/bin/pianobar
 NODE_BIN=/usr/bin/node
 PATIOBAR_DIR=~khawes/Patiobar
 
+
+pianobarStopped() {
+  echo PIANOBAR_STOPPED,,,,>$PIANOBAR_DIR/.config/pianobar/currentSong
+  # TODO: poke server to update current song
+}
+
+isPianobarRunning() {
+  pb_pid=$(pidof pianobar)
+  [[ "$pb_pid" -eq "" ]] && pianobarStopped
+  [[ "$pb_pid" -eq "" ]] && return 0 || return 1
+}
+
 case "$1" in
   startup)
 	# used on startup
@@ -31,6 +43,7 @@ case "$1" in
         echo -n 'P'>$PATIOBAR_DIR/ctl
         EXITSTATUS=$(($? + $EXITSTATUS))
         popd > /dev/null
+				isPianobarRunning
         exit "$EXITSTATUS"
         ;;
 
@@ -45,6 +58,7 @@ case "$1" in
         [[ "$pb_pid" -eq "" ]] && echo starting patiobar && ($NODE_BIN index.js patiobar > /dev/null 2>&1 &)
         EXITSTATUS=$(($? + $EXITSTATUS))
         popd > /dev/null
+				isPianobarRunning
         exit "$EXITSTATUS"
         ;;
 
@@ -69,6 +83,7 @@ case "$1" in
       	pb_pid=$(ps -ef | grep "[n]ode index.js patiobar" | tr -s ' ' | cut -d ' ' -f2)
         [[ "$pb_pid" -ne "" ]] && echo stopping $2 patiobar && kill $2 $pb_pid
         EXITSTATUS=$(($? + $EXITSTATUS))
+				isPianobarRunning
         exit $EXITSTATUS
 
        ;;
@@ -78,18 +93,19 @@ case "$1" in
         pb_pid=$(ps -ef | grep "[n]ode index.js patiobar" | tr -s ' ' | cut -d ' ' -f2)
         [[ "$pb_pid" -ne "" ]] && echo stopping patiobar && kill $pb_pid
         EXITSTATUS=$(($? + $EXITSTATUS))
+				isPianobarRunning
         exit $EXITSTATUS
         ;;
   stop-pianobar)
-	EXITSTATUS=0
+     	  EXITSTATUS=0
         pb_pid=$(pidof pianobar)
         # try the easy way by sending "q"uit to pianobar
         [[ "$pb_pid" -ne "" ]] && echo quitting pianobar && echo -n 'q' > $PATIOBAR_DIR/ctl
         [[ "$pb_pid" -ne "" ]] && sleep 5
 	      pb_pid2=$(pidof pianobar)
 	      # still there?  killit
-	      [[ "$pb_pid2" -ne "" ]] && echo killing pianobar && kill $pb_pid2
-        EXITSTATUS=$?
+	      [[ "$pb_pid2" -ne "" ]] && echo killing pianobar && kill $pb_pid2 && EXITSTATUS=$?
+				isPianobarRunning
         exit $EXITSTATUS
         ;;
   restart|force-reload)
@@ -110,13 +126,15 @@ case "$1" in
         [[ $EXITSTATUS  -eq 0 ]] || echo pianobar is running - $pb_pid
         cat $PIANOBAR_DIR/.config/pianobar/currentSong
         echo ""
+				isPianobarRunning
         exit $EXITSTATUS
         ;;
   status-pianobar)
-        EXITSTATUS=0
-        pb_pid=$(pidof pianobar)
-        EXITSTATUS=$([[ "$pb_pid" -eq "" ]] && echo 0 || echo 1)
-        [[ $EXITSTATUS  -eq 0 ]] || echo $pb_pid
+  			isPianobarRunning
+        EXITSTATUS=$?
+#        pb_pid=$(pidof pianobar)
+#        EXITSTATUS=$([[ "$pb_pid" -eq "" ]] && echo 0 || echo 1)
+#        [[ $EXITSTATUS  -eq 0 ]] || echo $pb_pid
         exit $EXITSTATUS
         ;;
   system-stop)

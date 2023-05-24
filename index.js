@@ -222,7 +222,6 @@ function ProcessCTL(action) {
 				return;
 			}
 			console.info('Stopping Pianobar');
-			ProcessCTL('stop-pianobar');
   		fs.writeFile(currentSongFile, 'PIANOBAR_STOPPED,,,,', function (err) {
 				if (err) {
 					console.error(err);
@@ -231,11 +230,15 @@ function ProcessCTL(action) {
 					console.info('Stop entry made in currentSong file!');
 				}
 			});
-			//		}
-			//		catch (err) {
-			//			console.error('Error in stopping Pianobar: ' + err.message);
-			//			return;
-			//		}
+			try {
+  			var pb_start = child_process.spawnSync(patiobarCtl, ['stop-pianobar']);
+				if (pb_start.status !== 0) throw pb_start.error;
+			}
+			catch (err) {
+				//console.error('Error in stopping Pianobar: ' + err.message);
+				console.error(err);
+				return;
+			}
 			break;
 
 		// try to inform clients when patiobar is shutting down
@@ -372,6 +375,22 @@ io.on('connection', function(socket) {
 		PidoraCTL(cmd);
 	});
 
+  app.get('/inactivity', function(request, response) {
+     response.send("no acrtivity for "+inactivity+"/"+inactivityThreshold+" minutes.\n");
+  });
+
+  app.get('/refresh', function(request, response) {
+    if (isPianobarRunning()) {
+			io.emit('start', readCurrentSong());
+	  	io.emit('stations', readStations());
+  		inactivity = 0;
+	  } else {
+	    io.emit('stop', readCurrentSong());
+	  }
+  	io.emit('volume', volume('get'));
+  	response.send('refreshed clients\n');
+  });
+
 	// triggered by eventcmd.sh or other external drivers
 	app.post('/start', function(request, response){
 		var artist = request.query.artist;
@@ -389,7 +408,8 @@ io.on('connection', function(socket) {
 	});
 
 	app.post('/lovehate', function(request) {   // is there a need for f(request, response)
-		var rating = request.query.rating;
+	  inactivity = 0;
+  	var rating = request.query.rating;
 		io.emit('lovehate', { rating: rating });
 		console.log(request.query);
 		response.send(request.query);
@@ -426,7 +446,7 @@ function inactivityTracker() {
 	console.info("inactivity="+inactivity);
 	if (inactivity >= inactivityThreshold) { 
 		if (inactivity <= (inactivityThreshold + 2)) { // try to stop 3 times
-			ProcessCTL('stop-pianobar');
+			ProcessCTL('stop');
 		} else {
 			inactivity = 100000;
 		}
