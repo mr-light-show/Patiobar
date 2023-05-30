@@ -448,7 +448,9 @@ function inactivityTracker() {
 		if (inactivity <= (inactivityThreshold + 2)) { // try to stop 3 times
 			ProcessCTL('stop');
 		} else {
-			inactivity = 100000;
+			if (inactivity > 1000000) {
+			  inactivity = 1000000;
+			}
 		}
 	}
 }
