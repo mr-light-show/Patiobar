@@ -10,8 +10,9 @@ baseurl="${host}:${port}"
 
 stationList="${HOME}/.config/pianobar/stationList"
 currentSong="${HOME}/.config/pianobar/currentSong"
-
+# rm ~/log
 while read L; do
+  # echo $L>>~/log
 	k="`echo "$L" | cut -d '=' -f 1`"
 	v="`echo "$L" | cut -d '=' -f 2`"
 	export "$k=$v"

@@ -74,10 +74,13 @@
 		<script src="/js/main.js"></script>
 		<script>
 			var url = document.location.href;
-			if (url.indexOf('admin') >= 0) {
-			} else {  
+			var isAdmin = url.indexOf('admin') > 0;
+			var isVote = isAdmin || url.indexOf('vote') > 0;
+			if (!isVote) {
 				$('#love').hide();
-				$('#hate').hide();
+				$('#hate').hide();				
+			}
+			if (!isAdmin) {
 				$('#process_controller').hide();
 				$('#ignore').hide();
 			}	
