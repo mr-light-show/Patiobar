@@ -8,8 +8,8 @@ baseurl="${host}:${port}"
 # Here be dragons! #
 # (Don't change anything below) #
 
-stationList="${HOME}/.config/pianobar/stationList"
-currentSong="${HOME}/.config/pianobar/currentSong"
+stationList="/run/user/1000/stationList"
+currentSong="/run/user/1000/currentSong"
 # rm ~/log
 while read L; do
   # echo $L>>~/log

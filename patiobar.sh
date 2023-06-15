@@ -4,10 +4,10 @@ PIANOBAR_DIR=~khawes
 PIANOBAR_BIN=/usr/bin/pianobar
 NODE_BIN=/usr/bin/node
 PATIOBAR_DIR=~khawes/Patiobar
-
+CURRENT_SONG=/run/user/1000/currentSong
 
 pianobarStopped() {
-  echo PIANOBAR_STOPPED,,,,>$PIANOBAR_DIR/.config/pianobar/currentSong
+  echo PIANOBAR_STOPPED,,,,>$CURRENT_SONG
   # TODO: poke server to update current song
 }
 
@@ -124,7 +124,7 @@ case "$1" in
         pb_pid=$(pidof pianobar)
         EXITSTATUS=$([[ "$pb_pid" -eq "" ]] && echo 0 || echo 1)
         [[ $EXITSTATUS  -eq 0 ]] || echo pianobar is running - $pb_pid
-        cat $PIANOBAR_DIR/.config/pianobar/currentSong
+        cat $CURRENT_SONG
         echo ""
 				isPianobarRunning
         exit $EXITSTATUS

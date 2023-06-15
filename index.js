@@ -42,8 +42,8 @@ const
 
 	pianobarOffImageURL = 'images/On_Off.png',
 
-	currentSongFile = process.env.HOME + '/.config/pianobar/currentSong',
-	pausePlayTouchFile = process.env.HOME + '/.config/pianobar/pause'; // perhaps this should move to ./config/patiobar/pause
+	currentSongFile = '/run/user/1000/currentSong',
+	pausePlayTouchFile = '/run/user/1000/pause'; // perhaps this should move to ./config/patiobar/pause
 
 // Routing
 app.use(express.static(__dirname + '/views'));
@@ -118,12 +118,12 @@ function volume(action) {
 	switch (action) {
 		case 'up':
 			if (volume <= volumeMax) {
-				get_volume = child_process.execSync(volumeSetCtl+" 1%+").toString();
+				get_volume = child_process.execSync(volumeSetCtl+" 1+").toString();
 			}
 			break;
 		case 'down':
 			if( volume >= volumeMin) {
-				get_volume = child_process.execSync(volumeSetCtl+" 1%-").toString();
+				get_volume = child_process.execSync(volumeSetCtl+" 1-").toString();
 			}
 			break;
 		case 'get':
@@ -288,7 +288,7 @@ function ProcessCTL(action) {
 // TODO consider making this more responsive if add/rename station is added
 // TODO consider making this a remembered global variable
 function readStations() {
-	var list = fs.readFileSync(process.env.HOME + '/.config/pianobar/stationList').toString().split('\n');
+	var list = fs.readFileSync('/run/user/1000/stationList').toString().split('\n');
 	return {'stations': list};
 }
 
