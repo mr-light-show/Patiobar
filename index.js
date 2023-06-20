@@ -30,6 +30,7 @@ const
 
         //patiobarCtl    = process.env.PIANOBAR_START  || process.env.HOME + '/Patiobar/patiobar.sh',
 	patiobarCtl	= process.env.HOME + '/Patiobar/patiobar.sh',
+	stationList = '/run/user/1000/stationList',
 	volumeGetCtl	= "/usr/bin/amixer sget 'Digital'",
 	volumeSetCtl    = "/usr/bin/amixer sset 'Digital' ",
 	volumeRegEx		= /Front Left: Playback (\d+)/,
@@ -288,8 +289,12 @@ function ProcessCTL(action) {
 // TODO consider making this more responsive if add/rename station is added
 // TODO consider making this a remembered global variable
 function readStations() {
-	var list = fs.readFileSync('/run/user/1000/stationList').toString().split('\n');
-	return {'stations': list};
+  if (fs.existsSync(stationList)) {
+		var list = fs.readFileSync(stationList).toString().split('\n');
+		return {'stations': list};
+	} else {
+		return "";
+	}
 }
 
 var socketlist = [];

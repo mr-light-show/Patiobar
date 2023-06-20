@@ -1,10 +1,11 @@
 #!/bin/bash
 
-PIANOBAR_DIR=~khawes
+PIANOBAR_DIR=~
 PIANOBAR_BIN=/usr/bin/pianobar
 NODE_BIN=/usr/bin/node
-PATIOBAR_DIR=~khawes/Patiobar
+PATIOBAR_DIR=~/Patiobar
 CURRENT_SONG=/run/user/1000/currentSong
+STATION_LIST=/run/user/1000/stationList
 
 pianobarStopped() {
   echo PIANOBAR_STOPPED,,,,>$CURRENT_SONG
@@ -19,21 +20,21 @@ isPianobarRunning() {
 
 case "$1" in
   startup)
-	# used on startup
-	echo  Pianobar startup...
-	sleep 10
-	hostname
-	hostname -I
-	$0 start-patiobar > /dev/null
-	exit 0
-	;;
+			# used on startup
+			echo  Pianobar startup...
+			sleep 10
+			hostname
+			hostname -I
+			$0 start-patiobar > /dev/null
+			exit 0
+			;;
 
   start)
         # should this return the pid of pianobar?
         # right now need two calls - one to start, and one to pianobar-status
         # likely will leave it that way for now
         EXITSTATUS=0
-	$0 start-patiobar
+				$0 start-patiobar
         pushd . > /dev/null
         cd $PIANOBAR_DIR
         pb_pid=$(pidof pianobar)
@@ -124,9 +125,11 @@ case "$1" in
         pb_pid=$(pidof pianobar)
         EXITSTATUS=$([[ "$pb_pid" -eq "" ]] && echo 0 || echo 1)
         [[ $EXITSTATUS  -eq 0 ]] || echo pianobar is running - $pb_pid
+				isPianobarRunning
         cat $CURRENT_SONG
         echo ""
-				isPianobarRunning
+        cat $STATION_LIST
+        echo ""
         exit $EXITSTATUS
         ;;
   status-pianobar)
