@@ -9,6 +9,7 @@ baseurl="${host}:${port}"
 # (Don't change anything below) #
 
 stationList="/run/user/1000/stationList"
+savedStationList=~/.config/pianobar/stationList
 currentSong="/run/user/1000/currentSong"
 # rm ~/log
 while read L; do
@@ -44,6 +45,10 @@ stationList () {
 		eval sn=\$$sn
 		echo "${i}:${sn}" >> "$stationList"
 	done
+
+	if [! cmp -s "$file1" "$file2"]; then
+	  cp $stationList $savedStationList
+	fi
 }
 
 

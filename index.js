@@ -30,7 +30,7 @@ const
 
         //patiobarCtl    = process.env.PIANOBAR_START  || process.env.HOME + '/Patiobar/patiobar.sh',
 	patiobarCtl	= process.env.HOME + '/Patiobar/patiobar.sh',
-	stationList = '/run/user/1000/stationList',
+	stationList = '~/.config/pianobar/stationList',
 	volumeGetCtl	= "/usr/bin/amixer sget 'Digital'",
 	volumeSetCtl    = "/usr/bin/amixer sset 'Digital' ",
 	volumeRegEx		= /Front Left: Playback (\d+)/,
