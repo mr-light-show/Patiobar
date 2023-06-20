@@ -291,7 +291,6 @@ function ProcessCTL(action) {
 function readStations() {
   if (fs.existsSync(stationList)) {
 		var list = fs.readFileSync(stationList).toString().split('\n');
-		console.warn(list);
 		return {'stations': list};
 	} else {
  	 	console.error('cannot find: '+stationList);
