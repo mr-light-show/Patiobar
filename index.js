@@ -30,7 +30,7 @@ const
 
         //patiobarCtl    = process.env.PIANOBAR_START  || process.env.HOME + '/Patiobar/patiobar.sh',
 	patiobarCtl	= process.env.HOME + '/Patiobar/patiobar.sh',
-	stationList = '~/.config/pianobar/stationList',
+	stationList = process.env.HOME + "/.config/pianobar/stationList",
 	volumeGetCtl	= "/usr/bin/amixer sget 'Digital'",
 	volumeSetCtl    = "/usr/bin/amixer sset 'Digital' ",
 	volumeRegEx		= /Front Left: Playback (\d+)/,
@@ -61,12 +61,12 @@ console.info('isPatiobarRunning '+ pb_status.status);
 }
 
 function readCurrentSong() {
-	var currentSong = fs.readFileSync(currentSongFile).toString();
 	var songTemplate = { artist: '', title: '', album: '',
 		coverArt: pianobarOffImageURL, rating: '',
 		stationName: '', songStationName: '', isplaying: false, isrunning: false };
 
-	if (currentSong) {
+  if (fs.existsSync(currentSongFile)) {
+		var currentSong = fs.readFileSync(currentSongFile).toString();
 		var a = currentSong.split(',,,');
 		if (a[0] === 'PIANOBAR_STOPPED') {
 			return (songTemplate);
@@ -291,8 +291,10 @@ function ProcessCTL(action) {
 function readStations() {
   if (fs.existsSync(stationList)) {
 		var list = fs.readFileSync(stationList).toString().split('\n');
+		console.warn(list);
 		return {'stations': list};
 	} else {
+ 	 	console.error('cannot find: '+stationList);
 		return "";
 	}
 }
