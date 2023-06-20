@@ -46,9 +46,7 @@ stationList () {
 		echo "${i}:${sn}" >> "$stationList"
 	done
 
-	if [! cmp -s "$file1" "$file2"]; then
-	  cp $stationList $savedStationList
-	fi
+	cmp -s "$stationList" "$savedStationList" || cp $stationList $savedStationList
 }
 
 

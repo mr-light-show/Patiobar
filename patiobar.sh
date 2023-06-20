@@ -5,7 +5,7 @@ PIANOBAR_BIN=/usr/bin/pianobar
 NODE_BIN=/usr/bin/node
 PATIOBAR_DIR=~/Patiobar
 CURRENT_SONG=/run/user/1000/currentSong
-STATION_LIST=/run/user/1000/stationList
+STATION_LIST=~/.config/pianobar/stationList
 
 pianobarStopped() {
   echo PIANOBAR_STOPPED,,,,>$CURRENT_SONG
