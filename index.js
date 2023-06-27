@@ -386,7 +386,7 @@ io.on('connection', function (socket) {
 
     socket.on('changeStation', function (data) {
         if (!isPianobarRunning()) {
-            console,warn("changeStation startign pianobar");
+            console.warn("changeStation startign pianobar");
             ProcessCTL('start');
         }
         console.info('User request:', data, user_id);
@@ -397,7 +397,8 @@ io.on('connection', function (socket) {
     });
 
     app.get('/inactivity', function (request, response) {
-        response.send("no acrtivity for " + inactivity + "/" + inactivityThreshold + " minutes.\n");
+        inactivityTracker();
+        response.send("Inactivity: " + inactivity + "/" + inactivityThreshold + " minutes.\n");
     });
 
     app.get('/refresh', function (request, response) {
