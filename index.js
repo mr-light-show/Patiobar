@@ -50,11 +50,11 @@ function isPianobarPlaying() {
 }
 
 // need to use a command to really check
-function isPianobarRunning() {
+function isPianobarRunning(notify = true) {
     const pb_status = child_process.spawnSync(patiobarCtl, ['status-pianobar']);
     console.info('isPatiobarRunning ' + pb_status.status);
     const result = pb_status.status !== 0;
-    if (!result) {
+    if (!result && notify) {
         notifyStopped();
     }
     return result;
@@ -451,7 +451,7 @@ function notifyStopped() {
 }
 
 function refresh() {
-    if (isPianobarRunning()) {
+    if (isPianobarRunning(false)) {
         io.emit('start', readCurrentSong());
         io.emit('stations', readStations());
         inactivity = 0;
