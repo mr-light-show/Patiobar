@@ -243,7 +243,6 @@ function ProcessCTL(action) {
                 return;
             }
             console.info('Stopping Pianobar');
-            notifyStopped();
             try {
                 var pb_start = child_process.spawnSync(patiobarCtl, ['stop-pianobar']);
                 if (pb_start.status !== 0) throw pb_start.error;
@@ -252,6 +251,7 @@ function ProcessCTL(action) {
                 console.error(err);
                 return;
             }
+            notifyStopped();
             break;
 
         // try to inform clients when patiobar is shutting down
@@ -437,7 +437,7 @@ function notifyStopped() {
             console.info('Stop entry made in currentSong file!');
         }
     });
-
+    refresh();
 }
 
 function refresh() {
