@@ -118,10 +118,11 @@ function pctVol(vol) {
 }
 
 function volume(action) {
+    let get_volume;
     let volume = volumeMax;
     try {
-        var get_volume = child_process.execSync(volumeGetCtl).toString();
-        var match = get_volume.match(volumeRegEx);
+        get_volume = child_process.execSync(volumeGetCtl).toString();
+        const match = get_volume.match(volumeRegEx);
         if (match) {
             volume = parseInt(match[1], 10);
         }
@@ -148,9 +149,9 @@ function volume(action) {
             get_volume = child_process.execSync(volumeSetCtl + half).toString();
     }
     console.info("getVolume: " + get_volume);
-    var match = get_volume.match(volumeRegEx);
-    if (match) {
-        volume = parseInt(match[1], 10);
+    const newMatch = get_volume.match(volumeRegEx);
+    if (newMatch) {
+        volume = parseInt(newMatch[1], 10);
     }
     return {'volume': pctVol(volume)};
 }
@@ -228,8 +229,10 @@ function ProcessCTL(action) {
                 // minimize any junk commands introduced while system was offline
                 clearFIFO();
                 PidoraCTL('P');  // if paused, start it
-                var pb_start = child_process.spawnSync(patiobarCtl, ['start']);
-                if (pb_start.status !== 0) throw pb_start.error;
+                const pb_start = child_process.spawnSync(patiobarCtl, ['start']);
+                if (pb_start.status !== 0) { // noinspection ExceptionCaughtLocallyJS
+                    throw pb_start.error;
+                }
             } catch (err) {
                 console.error(err);
                 return;
@@ -244,8 +247,10 @@ function ProcessCTL(action) {
             }
             console.info('Stopping Pianobar');
             try {
-                var pb_start = child_process.spawnSync(patiobarCtl, ['stop-pianobar']);
-                if (pb_start.status !== 0) throw pb_start.error;
+                const pb_stop = child_process.spawnSync(patiobarCtl, ['stop-pianobar']);
+                if (pb_stop.status !== 0) { // noinspection ExceptionCaughtLocallyJS
+                    throw pb_stop.error;
+                }
             } catch (err) {
                 //console.error('Error in stopping Pianobar: ' + err.message);
                 console.error(err);
@@ -297,6 +302,15 @@ function readStations() {
 }
 
 let socketlist = [];
+
+function removeSocket(socket, user_id) {
+    if (socketlist.includes(socket)) {
+        socketlist.splice(socketlist.indexOf(socket), 1)
+    } else {
+        console.warn('Socket was not in active list when disconnecting: ', user_id);
+    }
+}
+
 io.on('connection', function (socket) {
     // remotePort is often Wrong (or at least seemed to be with old library)
     const user_id = socket.request.connection.remoteAddress + ':' + socket.request.connection.remotePort + ' | ' + socket.id;
@@ -309,9 +323,7 @@ io.on('connection', function (socket) {
     // disconnect seems to fire.  Not sure about close... TODO remove if needed.
     socket.on('close', function () {
         console.info('socket closed', user_id);
-        const client_index = socketlist.splice(socketlist.indexOf(socket), 1);
-        if (client_index === -1)
-            console.warn('Socket was not in active list when disconnecting: ', user_id);
+        removeSocket(socket, user_id);
         socket.disconnect(0);
     });
 
@@ -321,9 +333,7 @@ io.on('connection', function (socket) {
 
     socket.on('disconnect', function () {
         console.info('User disconnected (client closed)', user_id);
-        const client_index = socketlist.splice(socketlist.indexOf(socket), 1);
-        if (client_index === -1)
-            console.warn('Socket was not in active list when disconnecting: ', user_id);
+        removeSocket(socket, user_id);
         socket.disconnect(0);
     });
 
@@ -348,6 +358,7 @@ io.on('connection', function (socket) {
                 break;
             case 'volume' :
                 socket.emit('volume', volume('get'));
+                break;
             case '*' :
                 console.warn('Unknown request');
                 break;
@@ -418,7 +429,7 @@ io.on('connection', function (socket) {
         response.send(request.query);
     });
 
-    app.post('/lovehate', function (request) {   // is there a need for f(request, response)
+    app.post('/lovehate', function (request, response) {   // is there a need for f(request, response)
         inactivity = 0;
         const rating = request.query.rating;
         io.emit('lovehate', {rating: rating});
@@ -432,7 +443,6 @@ function notifyStopped() {
     fs.writeFile(currentSongFile, 'PIANOBAR_STOPPED,,,,', function (err) {
         if (err) {
             console.error(err);
-            return;
         } else {
             console.info('Stop entry made in currentSong file!');
         }
@@ -475,7 +485,7 @@ function exitHandler(options, err) {
             process.exit();
         }, 5000);
     }
-};
+}
 
 function inactivityTracker() {
     inactivity++;
