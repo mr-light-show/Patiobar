@@ -452,12 +452,10 @@ function notifyStopped() {
 
 function refresh() {
     if (isPianobarRunning(false)) {
-        io.emit('start', readCurrentSong());
-        io.emit('stations', readStations());
         inactivity = 0;
-    } else {
-        io.emit('stop', readCurrentSong());
     }
+    io.emit('stop', readCurrentSong());
+    io.emit('stations', readStations());
     io.emit('volume', volume('get'));
 }
 
