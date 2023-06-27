@@ -22,7 +22,7 @@
 					<p class="navbar-brand" ng-controller="ProcessController" ng-click="process('start')">Patiobar</p>
 				</div><!-- End navbar-header -->
 
-				<div id="station-wrapper" ng-class="{'hidden-controls': !pianobarRunning}" ng-controller="SongController">
+				<div id="station-wrapper" ng-class="{'hidden-controls': false && !pianobarRunning}" ng-controller="SongController">
 					<div class="text-center collapse navbar-collapse" id="stations">
 						<button type="button" ng-repeat="station in stations" class="btn btn-default navbar-btn btn-sm" ng-click="stationName == station.name || changeStation(station.id);" ng-class="{'btn-info': songStationName == station.name, 'btn-success': stationName == station.name}">{{station.name}}</button>					
 					</div>
