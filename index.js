@@ -52,9 +52,10 @@ function isPianobarPlaying() {
 // need to use a command to really check
 function isPianobarRunning(notify = true) {
     const pb_status = child_process.spawnSync(patiobarCtl, ['status-pianobar']);
-    console.info('isPatiobarRunning ' + pb_status.status);
     const result = pb_status.status !== 0;
+    console.info('isPatiobarRunning ' + pb_status.status + " "+ result + " " + notify);
     if (!result && notify) {
+        console.warn("notify stopped");
         notifyStopped();
     }
     return result;
@@ -385,6 +386,7 @@ io.on('connection', function (socket) {
 
     socket.on('changeStation', function (data) {
         if (!isPianobarRunning()) {
+            console,warn("changeStation startign pianobar");
             ProcessCTL('start');
         }
         console.info('User request:', data, user_id);
@@ -451,10 +453,11 @@ function notifyStopped() {
 }
 
 function refresh() {
-    if (isPianobarRunning(false)) {
-        inactivity = 0;
+		const isRunning = isPianobarRunning(false);
+		if (isRunning) {
+			inactivity = 0;
     }
-    io.emit('stop', readCurrentSong());
+    io.emit(isRunning ? 'start' : 'stop', readCurrentSong());
     io.emit('stations', readStations());
     io.emit('volume', volume('get'));
 }
