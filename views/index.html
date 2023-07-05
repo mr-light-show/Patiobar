@@ -51,13 +51,20 @@
 						<button id="nextsong" type="button" class="btn btn-default" ng-click="sendCommand('n');"> <span class="glyphicon glyphicon-fast-forward"></span> </button>
 						<!--&nbsp;&nbsp;&nbsp;
 						<button id="ignore" type="button" title="Tired (shelve for a month)" class="btn btn-default" ng-click="sendCommand('t');" ng-class="{'hidden-controls': admin}"> <span class="glyphicon glyphicon-calendar"></span> </button>--->
+						<!-- 
 						&nbsp;&nbsp;&nbsp;
 						<button id="vol_down" type="button" class="btn btn-default" ng-click="sendCommand('(');"> <span class="glyphicon glyphicon-volume-down"></span> </button>
 						<button id="vol_up" type="button" class="btn btn-default" ng-click="sendCommand(')');"> <span class="glyphicon glyphicon-volume-up"></span> </button>
+						-->
 						<button id="hate" type="button"  class="pull-right btn btn-default" ng-click="sendCommand('-');"> <span class="glyphicon glyphicon-thumbs-down"></span> </button>
+						<div>&nbsp; </div>
+						<div style="margin: auto; width: 70%"><input type="range" ng-model="volume"  ng-change="sendCommand('v'+volume)" id="volumeRange" min="0" max="100" step="1"></div>
+						<!--
 						<div id="volume" style="text-align: right;">volume: {{volume}}%</div>
+						-->
 					</div>
 					<!-- <div id="volume"> {{volume}} </div> -->
+					
 					<div id="process_controller" class="col-container" ng-class="{'hidden-controls': false}" ng-controller="ProcessController">
                             <br> 
 							<button id="server-reboot"  type="button" class="pull-left btn btn-default" ng-click="process('system-reboot')"> <span class="glyphicon glyphicon-refresh"></span> </button>

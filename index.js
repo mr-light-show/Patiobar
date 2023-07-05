@@ -16,6 +16,8 @@ require('console-stamp')(console, {
 });
 
 let inactivity = 0;
+let currentVolume = 0;
+let newVolume = 0;
 const
     inactivityThreshold = 30, // minutes
     express = require('express'),
@@ -119,42 +121,36 @@ function pctVol(vol) {
 }
 
 function volume(action) {
-    let get_volume;
-    let volume = volumeMax;
-    try {
-        get_volume = child_process.execSync(volumeGetCtl).toString();
-        const match = get_volume.match(volumeRegEx);
-        if (match) {
-            volume = parseInt(match[1], 10);
-        }
-    } catch (err) {
-        console.error('Error: ' + err.toString());
-    }
     switch (action) {
         case 'up':
-            if (volume <= volumeMax) {
-                get_volume = child_process.execSync(volumeSetCtl + " 1+").toString();
+            if (currentVolume < 100 && newVolume < 100) {
+                newVolume++;
             }
             break;
         case 'down':
-            if (volume >= volumeMin) {
-                get_volume = child_process.execSync(volumeSetCtl + " 1-").toString();
+            if (currentVolume > 0 || newvolume > 0) {
+            	newVolume--;
             }
             break;
         case 'get':
-            return {'volume': pctVol(volume)};
-        case '50':
-            const half = " " + (Math.floor((volumeMax - volumeMin) / 2) + volumeMin);
-            //console.info("half:"+half+" ,max-min:"+((Math.floor(volumeMax-volumeMin)/2)+volumeMin)+", max:"+volumeMax+", min:"+volumeMin);
-            //process.exit();
-            get_volume = child_process.execSync(volumeSetCtl + half).toString();
+            return {'volume': currentVolume};
+        default:
+        	try {
+        	  newVolume = parseInt(action);
+        	} catch (error) {
+						console.error("error parsing new volume: "+action+"\n"+error.message);
+        	}
     }
-    console.info("getVolume: " + get_volume);
-    const newMatch = get_volume.match(volumeRegEx);
-    if (newMatch) {
-        volume = parseInt(newMatch[1], 10);
-    }
-    return {'volume': pctVol(volume)};
+    return {'volume': newVolume};
+}
+
+function setVolume() {
+	if (newVolume != currentVolume) {
+		currentVolume = newVolume;
+  	const setVolume = " " + (Math.floor((volumeMax - volumeMin) * (currentVolume / 100)) + volumeMin);
+    console.info(child_process.execSync(volumeSetCtl + setVolume).toString());
+    console.info('volume set to '+setVolume+" ("+currentVolume+"%)");
+	}
 }
 
 function PidoraCTL(action) {
@@ -380,6 +376,10 @@ io.on('connection', function (socket) {
                 io.emit('volume', volume('up'));
                 console.info('volume up');
                 return;
+            case 'v':
+                io.emit('volume', volume(data.action.substring(1)));
+                console.info('set volume: ' + data.action.substring(1));
+                return;
         }
         PidoraCTL(action);
     });
@@ -503,7 +503,8 @@ function inactivityTracker() {
     }
 }
 
-setInterval(inactivityTracker, 1000 * 60); // once a second.
+setInterval(setVolume, 500); // twice a second
+setInterval(inactivityTracker, 1000 * 60); // once a minute.
 
 process.on('exit', exitHandler.bind(null, {cleanup: true}));
 
