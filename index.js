@@ -207,6 +207,7 @@ function ProcessCTL(action) {
     switch (action) {
         case 'start':
             if (!isPianobarRunning()) {
+                io.emit('volume', volume('50'));
                 console.info('Starting Pianobar');
                 // pianobar starts in the running state, unless work is done to force it otherwise
                 // but wait for the first start message to change the playing from false to true
