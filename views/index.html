@@ -58,7 +58,11 @@
 						-->
 						<button id="hate" type="button"  class="pull-right btn btn-default" ng-click="sendCommand('-');"> <span class="glyphicon glyphicon-thumbs-down"></span> </button>
 						<div>&nbsp; </div>
-						<div style="margin: auto; width: 70%"><input type="range" ng-model="volume"  ng-change="sendCommand('v'+volume)" id="volumeRange" min="0" max="100" step="1"></div>
+						<div>
+						<div  style="margin: auto; float: left; width: 15%">&nbsp;</div>
+						<div class="col-sh-8" style="margin: auto; float: left; width: 70%"><input type="range" ng-model="volume"  ng-change="sendCommand('v'+volume)" id="volumeRange" min="0" max="100" step="1"></div>
+						<div class="col-sh-2" id="volume" style="float: right; text-align: left; width: 15%; margin: auto">&nbsp;{{volume}}%</div>
+						</div>
 						<!--
 						<div id="volume" style="text-align: right;">volume: {{volume}}%</div>
 						-->
