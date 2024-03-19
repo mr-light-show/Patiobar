@@ -33,11 +33,12 @@ const
     patiobarCtl = process.env.HOME + '/Patiobar/patiobar.sh',
     stationList = process.env.HOME + "/.config/pianobar/stationList",
 
-    volumeGetCtl = "/usr/bin/amixer sget 'Digital'",
-    volumeSetCtl = "/usr/bin/amixer sset 'Digital' ",
+    volumeGetCtl = "/usr/bin/amixer sget 'Master'",
+    volumeSetCtl = "/usr/bin/amixer sset 'Master' ",
     volumeRegEx = /Front Left: Playback (\d+)/,
-    volumeMax = 190,
-    volumeMin = 70,
+    volumeMax = 65536,
+    volumeMin = 0,
+    volumePercentIncrement = 10,
 
     pianobarOffImageURL = 'images/On_Off.png',
 
@@ -124,12 +125,12 @@ function volume(action) {
     switch (action) {
         case 'up':
             if (currentVolume < 100 && newVolume < 100) {
-                newVolume++;
+                newVolume += volumePercentIncrement;
             }
             break;
         case 'down':
             if (currentVolume > 0 || newvolume > 0) {
-            	newVolume--;
+            	newVolume -= volumePercentIncrement;
             }
             break;
         case 'get':
