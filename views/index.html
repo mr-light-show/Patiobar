@@ -24,7 +24,7 @@
 
 				<div id="station-wrapper" ng-class="{'hidden-controls': false && !pianobarRunning}" ng-controller="SongController">
 					<div class="text-center collapse navbar-collapse" id="stations">
-						<button type="button" ng-repeat="station in stations" class="btn btn-default navbar-btn btn-sm" ng-click="stationName == station.name || changeStation(station.id);" ng-class="{'btn-info': songStationName == station.name, 'btn-success': stationName == station.name}">{{station.name}}</button>					
+						<button type="button" ng-repeat="station in stations" class="btn btn-default navbar-btn" ng-click="stationName == station.name || changeStation(station.id);" ng-class="{'btn-info': songStationName == station.name, 'btn-success': stationName == station.name}">{{station.name}}</button>					
 					</div>
 				</div>
 			</div> <!-- End container-fluid -->
@@ -46,17 +46,17 @@
 					</div>
 
 					<div id="controls" ng-class="{'hidden-controls': !pianobarRunning}">
-						<button id= "love" type="button" class="pull-left btn btn-default" ng-click="sendCommand('+');" ng-class="{'btn-success': loved}"> <span class="glyphicon glyphicon-thumbs-up"></span> </button>
-						<button id="pauseplay" type="button" class="btn btn-default" ng-click="togglePausePlay()"> <span id="pauseplayICON" ng-class="pianobarPlaying ? 'glyphicon glyphicon-pause' : 'glyphicon glyphicon-play'"> </span> </button>
-						<button id="nextsong" type="button" class="btn btn-default" ng-click="sendCommand('n');"> <span class="glyphicon glyphicon-fast-forward"></span> </button>
+						<button id= "love" type="button" class="pull-left btn btn-default btn-lg" ng-click="sendCommand('+');" ng-class="{'btn-success': loved}"> <span class="glyphicon glyphicon-thumbs-up"></span> </button>
+						<button id="pauseplay" type="button" class="btn btn-default btn-lg" ng-click="togglePausePlay()"> <span id="pauseplayICON" ng-class="pianobarPlaying ? 'glyphicon glyphicon-pause' : 'glyphicon glyphicon-play'"> </span> </button>
+						<button id="nextsong" type="button" class="btn btn-default btn-lg" ng-click="sendCommand('n');"> <span class="glyphicon glyphicon-fast-forward"></span> </button>
 						<!--&nbsp;&nbsp;&nbsp;
-						<button id="ignore" type="button" title="Tired (shelve for a month)" class="btn btn-default" ng-click="sendCommand('t');" ng-class="{'hidden-controls': admin}"> <span class="glyphicon glyphicon-calendar"></span> </button>--->
+						<button id="ignore" type="button" title="Tired (shelve for a month)" class="btn btn-default btn-lg" ng-click="sendCommand('t');" ng-class="{'hidden-controls': admin}"> <span class="glyphicon glyphicon-calendar"></span> </button>--->
 
 
-						<button id="vol_down" type="button" class="btn btn-default" ng-click="sendCommand('(');"> <span class="glyphicon glyphicon-volume-down"></span> </button>
-						<button id="vol_up" type="button" class="btn btn-default" ng-click="sendCommand(')');"> <span class="glyphicon glyphicon-volume-up"></span> </button>
+						<button id="vol_down" type="button" class="btn btn-default btn-lg" ng-click="sendCommand('(');"> <span class="glyphicon glyphicon-volume-down"></span> </button>
+						<button id="vol_up" type="button" class="btn btn-default btn-lg" ng-click="sendCommand(')');"> <span class="glyphicon glyphicon-volume-up"></span> </button>
 
-						<button id="hate" type="button"  class="pull-right btn btn-default" ng-click="sendCommand('-');"> <span class="glyphicon glyphicon-thumbs-down"></span> </button>
+						<button id="hate" type="button"  class="pull-right btn btn-default btn-lg" ng-click="sendCommand('-');"> <span class="glyphicon glyphicon-thumbs-down"></span> </button>
 						<div>&nbsp; </div>
 						<div>
 							<div id="volume" style="margin: auto; float: left; width: 15%; text-align: right">volume&nbsp;&nbsp;</div>
@@ -71,9 +71,9 @@
 					
 					<div id="process_controller" class="col-container" ng-class="{'hidden-controls': false}" ng-controller="ProcessController">
                             <br> 
-							<button id="server-reboot"  type="button" class="pull-left btn btn-default" ng-click="process('system-reboot')"> <span class="glyphicon glyphicon-refresh"></span> </button>
-							<button id="process-start" type="button" class="btn btn-default" ng-click="process(pianobarRunning ? 'stop' : 'start')" ng-class="{'btn-danger': !pianobarRunning}"> <span class="glyphicon glyphicon-off"></span> </button>
-							<button id="server-stop" type="button" class="pull-right btn btn-default" ng-click="process('system-stop')"> <span class="glyphicon glyphicon-flash"></span> </button>
+							<button id="server-reboot"  type="button" class="pull-left btn btn-default btn-lg" ng-click="process('system-reboot')"> <span class="glyphicon glyphicon-refresh"></span> </button>
+							<button id="process-start" type="button" class="btn btn-default btn-lg" ng-click="process(pianobarRunning ? 'stop' : 'start')" ng-class="{'btn-danger': !pianobarRunning}"> <span class="glyphicon glyphicon-off"></span> </button>
+							<button id="server-stop" type="button" class="pull-right btn btn-default btn-lg" ng-click="process('system-stop')"> <span class="glyphicon glyphicon-flash"></span> </button>
 					</div>
 				</div> <!-- End text-center -->
 			</div> <!-- End Player -->
