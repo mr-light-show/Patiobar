@@ -1,48 +1,63 @@
-Patiobar
-========
+# Patiobar
 
-![Frontend Screenshot](http://i.imgur.com/XyNO2qTl.png)
+![Frontend Screenshot](https://i.imgur.com/NktR1kj.jpeg)
 
 A web frontend for pianobar, which is a CLI frontend for Pandora.
 
 Provides a simple way for controlling what is playing on the radio.
 I use this to allow guests (and myself) to control the music playing
-outside on my patio with their phones.  
+outside on my patio with their phones.
 
-This was inspired by [Pidora](https://github.com/jacroe/pidora).
-I wasn't happy with the way Pidora does templating so instead of
-forking that project, I wanted to start fresh.  I also wanted to
-learn NodeJS and socket.io (websockets), so this was a great
-project for that.
+This program was originally written by
+[Kyle Johnson](https://github.com/kylejohnson/Patiobar)
+and extended and made headless by
+[sig-tesla](https://github.com/sig-tesla/Patiobar).
+This fork modifies the installation script to create a systemd unit to
+automatically start Patiobar at boot time, for dedicated
+pianobar/Patiobar devices (such as Raspberry Pis).
 
-A great way to control Pandora / Pianobar on a Raspberry Pi
+## Usage
 
-Install
--------
-Either
-`curl -s https://raw.githubusercontent.com/kylejohnson/Patiobar/master/install.sh | bash`
-or 
+I have tested this on Raspbian 11 "Bullseye" on a Raspberry Pi 2 and on
+Debian 12 "Bookworm" in a virtual environment. I run this under a normal
+(non-root) user account, using systemd's user environment and login
+lingering to start it at boot. If you are using Raspbian/Debian 11 or
+12, these steps should work for you:
+
+Install git, pianobar, and npm:
+
 ```bash
-git clone https://github.com/kylejohnson/Patiobar.git
-cd Patiobar
-bash install.sh
+sudo apt install git npm pianobar
 ```
 
-Usage
------
+To allow node to bind to port 80:
 
-We assume that you've installed Patiobar to your users home directory!
+```bash
+sudo setcap cap_net_bind_service=+ep /usr/bin/node
+```
 
-1. Follow the Install instructions above
-2. Start `pianobar`, perhaps in a screen.  e.g. `screen -S pianobar -d -m pianobar`
-3. Login, if you don't have pianobar set to do that automatically
-4. Select a station, if one isn't already playing or configured to auto-play
-5. Start Patiobar: `cd Patiobar && node index.js`
-6. Browse to the IP address or hostname of the machine running pianobar /
-   Patiobar on port 3000.  e.g. http://192.168.1.2:3000/
+After this, you can clone the repo and use the installation script:
 
-Support
--------
+```bash
+git clone https://github.com/topkecleon/Patiobar
+cd Patiobar
+./install.sh
+```
 
-If something doesn't work, please open a
-[github issue](https://github.com/kylejohnson/Patiobar/issues).
+You will need to edit your pianobar config
+(at `~/.config/pianobar/config`) to set your
+Pandora username and password.
+
+The installation script will (hopefully) create and enable a systemd
+unit file for patiobar to start automatically when the system boots.
+To start it for the first time, you can reboot your machine or run:
+
+```bash
+systemctl --user start patiobar
+```
+
+Connect to your device's IP address in your web browser to access
+Patiobar. By default, only play/pause, skip, and volume controls are
+shown. Additional controls to rate songs, restart the device, restart
+pianobar, and shut down the device, are available by appending `?admin` 
+to the address.
