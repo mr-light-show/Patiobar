@@ -38,9 +38,8 @@ const
     volumeRegEx = /Front Left: Playback (\d+)/,
     volumeMax = 65536,
     volumeMin = 0,
-    volumePercentIncrement = 10,
 
-    pianobarOffImageURL = 'images/On_Off.png',
+    pianobarOffImageURL = '',
 
     currentSongFile = '/run/user/1000/currentSong',
     pausePlayTouchFile = '/run/user/1000/pause'; // perhaps this should move to ./config/patiobar/pause
@@ -125,12 +124,12 @@ function volume(action) {
     switch (action) {
         case 'up':
             if (currentVolume < 100 && newVolume < 100) {
-                newVolume += volumePercentIncrement;
+                newVolume++;
             }
             break;
         case 'down':
             if (currentVolume > 0 || newvolume > 0) {
-            	newVolume -= volumePercentIncrement;
+                newVolume--;
             }
             break;
         case 'get':
@@ -208,12 +207,12 @@ function ProcessCTL(action) {
     switch (action) {
         case 'start':
             if (!isPianobarRunning()) {
-                io.emit('volume', volume('50'));
+                io.emit('volume', volume('25'));
                 console.info('Starting Pianobar');
                 // pianobar starts in the running state, unless work is done to force it otherwise
                 // but wait for the first start message to change the playing from false to true
                 const songStatus = Object.assign(songTemplate, {
-                    title: 'Warming up',
+                    title: 'pianobar is starting...',
                     artist: ' ',
                     isplaying: false,
                     isrunning: false
@@ -524,6 +523,6 @@ process.on('SIGHUP', function () {
     });
 });
 console.info(patiobarCtl);
-volume("50");
+volume("25");
 // start the server after all other code is in place
 server.listen(listenPort);

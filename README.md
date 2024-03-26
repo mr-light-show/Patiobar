@@ -1,8 +1,8 @@
 # Patiobar
 
-![Frontend Screenshot](https://i.imgur.com/NktR1kj.jpeg)
+![Frontend Screenshot](https://i.imgur.com/updnMaV.jpeg)
 
-A web frontend for pianobar, which is a CLI frontend for Pandora.
+A web frontend for pianobar, which is a console-based client for Pandora.
 
 Provides a simple way for controlling what is playing on the radio.
 I use this to allow guests (and myself) to control the music playing
@@ -57,7 +57,4 @@ systemctl --user start patiobar
 ```
 
 Connect to your device's IP address in your web browser to access
-Patiobar. By default, only play/pause, skip, and volume controls are
-shown. Additional controls to rate songs, restart the device, restart
-pianobar, and shut down the device, are available by appending `?admin` 
-to the address.
+Patiobar.

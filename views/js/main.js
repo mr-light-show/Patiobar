@@ -147,13 +147,14 @@ function StationController($scope, socket) {
 
 function SongController($scope, socket) {
 	socket.on('start', function(msg) {
+        var t = msg.title;
 		var aa = msg.artist;
-		$scope.artist = (!aa) ? ((msg.isRunning) ? 'Music should start soon.' : '^^ Press power ^^') : aa;
+		$scope.artist = (!aa) ? ((msg.isRunning) ? '' : 'Press the power button to start pianobar.') : aa;
 		$scope.album = (!aa) ? '' : msg.album;
 		$scope.songStationName = (!aa || !msg.songStationName) ? '' : NormalizeStationName(msg.songStationName);
-		$scope.src = (msg.coverArt) ? msg.coverArt : '/images/no-art.png';
+		$scope.src = (msg.coverArt) ? msg.coverArt : '';
 		$scope.alt = msg.album;
-		$scope.title = msg.title;
+		$scope.title = (!t) ? ((msg.isRunning) ? 'Please wait...' : 'pianobar is turned off.') : msg.title;
 		$scope.loved = (+msg.rating === 1);
 		$scope.pianobarPlaying = msg.isplaying && msg.isrunning; // false when 'warming up'
 		$scope.pianobarRunning = msg.isrunning; // false when 'warming up'
@@ -180,8 +181,8 @@ function SongController($scope, socket) {
 	socket.on('stop', function() {   // is there any need to process f(msg)
 		$scope.pianobarPlaying = false;
 		$scope.pianobarRunning = false;
-		$scope.title = 'Pianobar turned off.';
-		$scope.albumartist = 'Click the play key to start';
+		$scope.title = 'pianobar is turned off.';
+		$scope.artist = 'Press the power button to start pianobar.';
 		$scope.rating = 0;
 	});
 
@@ -228,8 +229,8 @@ function SongController($scope, socket) {
 	});
 	socket.on('disconnect', function () {
 		console.log('song controller disconnecting');
-		$scope.title = 'DISCONNECTED from Patiobar Server!';
-		$scope.album = '...Hopefully just a brief interuption...';
+		$scope.title = 'Disconnected from patiobar.';
+		$scope.album = 'Attempting to reconnect...';
 		$scope.pianobarRunning=false;
 		$scope.patiobarRunning=false;
 	});
