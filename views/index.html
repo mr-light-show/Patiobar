@@ -26,10 +26,10 @@
                 padding-bottom: 100%;
             }
             /* Form range color to match -blue buttons. */
-            .form-range::-moz-range-thumb, .form-range::-webkit-slider-thumb {
+            .form-range-blue::-moz-range-thumb, .form-range-blue::-webkit-slider-thumb {
                 background-color: var(--bs-primary);
             }
-            [data-bs-theme=dark] .form-range::-moz-range-thumb, [data-bs-theme=dark] .form-range::-webkit-slider-thumb {
+            [data-bs-theme=dark] .form-range-blue::-moz-range-thumb, [data-bs-theme=dark] .form-range-blue::-webkit-slider-thumb {
                 background-color: var(--bs-info);
             }
         </style>
@@ -82,7 +82,7 @@
                     <span style="font-size: 1.5rem;"><i class="bi bi-volume-up-fill"></i></span>
                 </div>
                 <div class="col">
-                    <input type="range" ng-model="volume" class="form-range" ng-change="sendCommand('v'+volume)" id="volumeRange" min="0" max="100" step="5">        
+                    <input type="range" ng-model="volume" class="form-range form-range-blue" ng-change="sendCommand('v'+volume)" id="volumeRange" min="0" max="100" step="5">        
                 </div>
                 <div class="col-2 pb-2">
                     <span style="font-size: 1.25rem;">{{volume}}%</span>
@@ -94,14 +94,15 @@
         <div class="container-fluid g-0" ng-controller="SongController">
             <nav class="navbar fixed-bottom bg-body-tertiary">
                 <div class="container-fluid pb-mw">
-                    <button type="button" class="navbar-toggler navbar-left mx-2" data-bs-toggle="collapse" data-bs-target="#tools">
+                    <button type="button" class="navbar-toggler navbar-left mx-2 px-3 py-2" data-bs-toggle="collapse" data-bs-target="#tools">
                         <i class="bi bi-tools"></i>
                     </button>
                     <span class="navbar-brand">patiobar</span>
-                    <button type="button" class="navbar-toggler navbar-right mx-2" data-bs-toggle="collapse" data-bs-target="#stations">
+                    <button type="button" class="navbar-toggler navbar-right mx-2 px-3 py-2" data-bs-toggle="collapse" data-bs-target="#stations">
                         <i class="bi bi-music-note-list"></i>
                     </button>
                     <div class="collapse navbar-collapse text-start" id="tools" ng-controller="ProcessController">
+                        <p></p>
                         <ul class="navbar-nav me-auto">
                             <li class="nav-item">
                                 <a class="nav-link text-body" href="#" ng-click="sendCommand('+');">
@@ -147,6 +148,7 @@
                         </ul>
                     </div>
                     <div class="collapse navbar-collapse text-center" id="stations" ng-controller="StationController">
+                        <p></p>
                         <button type="button"
                                 class="btn m-1"
                                 ng-class="stationName == station.name ? 'btn-blue' : 'btn-outline-bw'"
