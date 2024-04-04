@@ -26,10 +26,16 @@
                 padding-bottom: 100%;
             }
             /* Form range color to match -blue buttons. */
-            .form-range-blue::-moz-range-thumb, .form-range-blue::-webkit-slider-thumb {
+            .form-range-blue::-moz-range-thumb {
                 background-color: var(--bs-primary);
             }
-            [data-bs-theme=dark] .form-range-blue::-moz-range-thumb, [data-bs-theme=dark] .form-range-blue::-webkit-slider-thumb {
+            .form-range-blue::-webkit-slider-thumb {
+                background-color: var(--bs-primary);
+            }
+            [data-bs-theme=dark] .form-range-blue::-moz-range-thumb {
+                background-color: var(--bs-info);
+            }
+            [data-bs-theme=dark] .form-range-blue::-webkit-slider-thumb {
                 background-color: var(--bs-info);
             }
         </style>
@@ -63,8 +69,7 @@
             </div>
 
             <div class="row my-4" ng-class="{'d-none': !pianobarRunning}">
-                <div class="col">
-                </div>
+                <div class="col"></div>
                 <div class="col">
                     <button type="button" class="btn btn-outline-blue btn-lg" ng-click="togglePausePlay()">
                         <i class="bi" ng-class="pianobarPlaying ? 'bi-pause-fill' : 'bi-play-fill'"></i>
@@ -104,25 +109,25 @@
                     <div class="collapse navbar-collapse text-start" id="tools" ng-controller="ProcessController">
                         <p></p>
                         <ul class="navbar-nav me-auto">
-                            <li class="nav-item">
+                            <li class="nav-item" ng-class="{'d-none': !pianobarRunning}">
                                 <a class="nav-link text-body" href="#" ng-click="sendCommand('+');">
                                     <i class="bi mx-2" ng-class="loved ? 'bi-hand-thumbs-up-fill' : 'bi-hand-thumbs-up'"></i>
                                     {{loved ? 'Loved' : 'Love song'}}
                                 </a>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item" ng-class="{'d-none': !pianobarRunning}">
                                 <a class="nav-link text-body" href="#" ng-click="sendCommand('-');">
                                     <i class="bi bi-hand-thumbs-down mx-2"></i>
                                     Hate song
                                 </a>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item" ng-class="{'d-none': !pianobarRunning}">
                                 <a class="nav-link text-body" href="#" ng-click="sendCommand('t');">
                                     <i class="bi bi-ban mx-2"></i>
                                     Ban song for one month
                                 </a>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item" ng-class="{'d-none': !pianobarRunning}">
                                 <a class="nav-link">
                                     <i class="bi bi-dash-lg mx-2"></i>
                                 </a>
