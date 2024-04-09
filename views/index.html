@@ -1,12 +1,11 @@
 <!doctype html>
-<html lang="en" ng-app="patiobarApp" data-bs-theme="light">
+<html lang="en" ng-app="patiobarApp">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>patiobar</title>
         <link rel="stylesheet" href="/css/bootstrap.min.css">
         <link rel="stylesheet" href="/css/bootstrap-icons.min.css">
-        <link rel="stylesheet" href="/css/custom-bootstrap-buttons.css">
         <link rel="icon" sizes="any" type="image/svg+xml" href="data:image/svg+xml, %3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cstyle%3E path %7B fill: %23212529; %7D @media (prefers-color-scheme: dark) %7B path %7B fill: %23dee2e6; %7D %7D %3C/style%3E%3Cpath d='M9 13c0 1.105-1.12 2-2.5 2S4 14.105 4 13s1.12-2 2.5-2 2.5.895 2.5 2'/%3E%3Cpath fill-rule='evenodd' d='M9 3v10H8V3z'/%3E%3Cpath d='M8 2.82a1 1 0 0 1 .804-.98l3-.6A1 1 0 0 1 13 2.22V4L8 5z'/%3E%3C/svg%3E">
         <link rel="icon" type="image/ico" href="/favicon.ico">
         <style>
@@ -16,168 +15,155 @@
             }
             /* Prevents the navbar from covering the volume slider. */
             body {
-                padding-bottom: 4rem;
+                padding-bottom: 3rem;
             }
-            /* This is a hack to keep the space for the album art from
-            collapsing when there is nothing to show there. */
-            .square {
-                height: 0;
-                width: 100%;
-                padding-bottom: 100%;
+            /* Hide borders, make brighter, make corners sharper. */
+            .navbar-toggler {
+                border-width: 0;
+                color: var(--bs-navbar-brand-color);
+                border-radius: 0.125rem;
             }
-            /* Form range color to match -blue buttons. */
-            .form-range-blue::-moz-range-thumb {
-                background-color: var(--bs-primary);
-            }
-            .form-range-blue::-webkit-slider-thumb {
-                background-color: var(--bs-primary);
-            }
-            [data-bs-theme=dark] .form-range-blue::-moz-range-thumb {
-                background-color: var(--bs-info);
-            }
-            [data-bs-theme=dark] .form-range-blue::-webkit-slider-thumb {
-                background-color: var(--bs-info);
+            /* Make corners sharper. Bootstrap corners are bleh. */
+            .btn {
+                border-radius: 0.25rem;
             }
         </style>
     </head>
     <body>
-        <!-- Album art. No padding or margins. -->
+        <!-- Album art. -->
         <div class="container-fluid g-0 pb-mw" ng-controller="SongController">
-            <div class="container-fluid gx-0 square" ng-controller="ProcessController">
-                <!-- Display album art if pianobar is running and art is available. -->
-                <img width="100%" class="center-block img-fluid" ng-src="{{src}}" alt="{{alt}}" ng-class="{'d-none': !pianobarRunning || src == ''}">
-                <!-- Display the disc icon if pianobar is running and art is not available. -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="100%" fill="currentColor" class="bi bi-disc" viewBox="0 0 16 16" ng-class="{'d-none': !pianobarRunning || src != ''}">
-                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                    <path d="M10 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0M8 4a4 4 0 0 0-4 4 .5.5 0 0 1-1 0 5 5 0 0 1 5-5 .5.5 0 0 1 0 1m4.5 3.5a.5.5 0 0 1 .5.5 5 5 0 0 1-5 5 .5.5 0 0 1 0-1 4 4 0 0 0 4-4 .5.5 0 0 1 .5-.5"/>
-                </svg>
-                <!-- Display the power icon if pianobar is not running. -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="100%" fill="currentColor" class="bi bi-power" viewBox="0 0 16 16" ng-class="{'d-none': pianobarRunning }" ng-click="process('start')">
-                    <path d="M7.5 1v7h1V1z"/>
-                    <path d="M3 8.812a5 5 0 0 1 2.578-4.375l-.485-.874A6 6 0 1 0 11 3.616l-.501.865A5 5 0 1 1 3 8.812"/>
-                </svg>
-            </div>
+            <!-- Display album art if art is available. -->
+            <img width="100%" class="center-block img-fluid" ng-src="{{src}}" alt="{{alt}}" ng-class="{'d-none': src == ''}">
+            <!-- Display the disc icon if art is not available. -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="100%" fill="currentColor" class="bi bi-disc" viewBox="0 0 16 16" ng-class="{'d-none': src != ''}">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                <path d="M10 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0M8 4a4 4 0 0 0-4 4 .5.5 0 0 1-1 0 5 5 0 0 1 5-5 .5.5 0 0 1 0 1m4.5 3.5a.5.5 0 0 1 .5.5 5 5 0 0 1-5 5 .5.5 0 0 1 0-1 4 4 0 0 0 4-4 .5.5 0 0 1 .5-.5"/>
+            </svg>
         </div>
-
         <!-- Controls. -->
         <div class="container-fluid text-center pb-mw" ng-controller="SongController">
+            <!-- Title/artist. -->
             <div class="row my-4">
                 <div class="col">
                     <p class="h5">{{title}}</p>
-                    {{artist}}
+                    <p class="mb-0">{{artist}}</p>
                 </div>
             </div>
-
+            <!-- "Start pianobar" button. Hidden when running or disconnected. -->
+            <div class="row m-4" ng-class="{'d-none': pianobarRunning || !patiobarRunning}" ng-controller="ProcessController">
+                <button type="button" class="btn btn-primary btn-lg" ng-click="process('start')">
+                    <i class="bi bi-power"></i>
+                    Start
+                </button>
+            </div>
+            <!-- Play/pause and skip. Hidden when not running. -->
             <div class="row my-4" ng-class="{'d-none': !pianobarRunning}">
-                <div class="col"></div>
                 <div class="col">
-                    <button type="button" class="btn btn-outline-blue btn-lg" ng-click="togglePausePlay()">
+                </div>
+                <div class="col">
+                    <button type="button" class="btn btn-primary btn-lg" ng-click="togglePausePlay()">
                         <i class="bi" ng-class="pianobarPlaying ? 'bi-pause-fill' : 'bi-play-fill'"></i>
                     </button>
                 </div>
                 <div class="col">
-                    <button type="button" class="btn btn-outline-blue btn-lg" ng-click="sendCommand('n');">
+                    <button type="button" class="btn btn-primary btn-lg" ng-click="sendCommand('n');">
                         <i class="bi bi-skip-forward-fill"></i>
                     </button>
                 </div>
-            </div> 
-
-            <div class="row align-items-center" ng-class="{'d-none': !pianobarRunning}">
+            </div>
+            <!-- Volume. Hidden when not running. -->
+            <div class="row align-items-center mx-2" ng-class="{'d-none': !pianobarRunning}">
                 <div class="col-2 pb-2">
                     <span style="font-size: 1.5rem;"><i class="bi bi-volume-up-fill"></i></span>
                 </div>
                 <div class="col">
-                    <input type="range" ng-model="volume" class="form-range form-range-blue" ng-change="sendCommand('v'+volume)" id="volumeRange" min="0" max="100" step="5">        
+                    <input type="range" ng-model="volume" class="form-range" ng-change="sendCommand('v'+volume)" id="volumeRange" min="0" max="100" step="5">
                 </div>
                 <div class="col-2 pb-2">
                     <span style="font-size: 1.25rem;">{{volume}}%</span>
                 </div>
             </div>
         </div>
-        
-        <!-- Navbar. No padding or margins. -->
-        <div class="container-fluid g-0" ng-controller="SongController">
-            <nav class="navbar fixed-bottom bg-body-tertiary">
-                <div class="container-fluid pb-mw">
-                    <button type="button" class="navbar-toggler navbar-left mx-2 px-3 py-2" data-bs-toggle="collapse" data-bs-target="#tools">
-                        <i class="bi bi-tools"></i>
-                    </button>
-                    <span class="navbar-brand">patiobar</span>
-                    <button type="button" class="navbar-toggler navbar-right mx-2 px-3 py-2" data-bs-toggle="collapse" data-bs-target="#stations">
-                        <i class="bi bi-music-note-list"></i>
-                    </button>
-                    <div class="collapse navbar-collapse text-start" id="tools" ng-controller="ProcessController">
-                        <p></p>
-                        <ul class="navbar-nav me-auto">
-                            <li class="nav-item" ng-class="{'d-none': !pianobarRunning}">
-                                <a class="nav-link text-body" href="#" ng-click="sendCommand('+');">
-                                    <i class="bi mx-2" ng-class="loved ? 'bi-hand-thumbs-up-fill' : 'bi-hand-thumbs-up'"></i>
-                                    {{loved ? 'Loved' : 'Love song'}}
-                                </a>
-                            </li>
-                            <li class="nav-item" ng-class="{'d-none': !pianobarRunning}">
-                                <a class="nav-link text-body" href="#" ng-click="sendCommand('-');">
-                                    <i class="bi bi-hand-thumbs-down mx-2"></i>
-                                    Hate song
-                                </a>
-                            </li>
-                            <li class="nav-item" ng-class="{'d-none': !pianobarRunning}">
-                                <a class="nav-link text-body" href="#" ng-click="sendCommand('t');">
-                                    <i class="bi bi-ban mx-2"></i>
-                                    Ban song for one month
-                                </a>
-                            </li>
-                            <li class="nav-item" ng-class="{'d-none': !pianobarRunning}">
-                                <a class="nav-link">
-                                    <i class="bi bi-dash-lg mx-2"></i>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-body" href="#" ng-click="process(pianobarRunning ? 'stop' : 'start')">
-                                    <i class="be mx-2" ng-class="pianobarRunning ? 'bi-arrow-down' : 'bi-arrow-up'"></i>
-                                    {{pianobarRunning ? 'Stop pianobar' : 'Start pianobar'}}
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-body" href="#" ng-click="process('system-reboot')">
-                                    <i class="bi bi-arrow-clockwise mx-2"></i>
-                                    Reboot device
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-body" href="#" ng-click="process('system-stop')">
-                                    <i class="bi bi-power mx-2"></i>
-                                    Shut down device
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="collapse navbar-collapse text-center" id="stations" ng-controller="StationController">
-                        <p></p>
-                        <button type="button"
-                                class="btn m-1"
-                                ng-class="stationName == station.name ? 'btn-blue' : 'btn-outline-bw'"
-                                ng-repeat="station in stations"
-                                ng-click="stationName == station.name || changeStation(station.id);">
-                            {{station.name}}
-                        </button>
-                    </div>
+        <!-- Navbar -->
+        <nav class="navbar fixed-bottom bg-primary" data-bs-theme="dark" ng-controller="SongController">
+            <div class="container-fluid pb-mw">
+                <button type="button" class="navbar-toggler navbar-left mx-2 px-3 py-2" data-bs-toggle="collapse" data-bs-target="#tools">
+                    <i class="bi bi-tools"></i>
+                </button>
+                <span class="navbar-brand">patiobar</span>
+                <button type="button" class="navbar-toggler navbar-right mx-2 px-3 py-2" data-bs-toggle="collapse" data-bs-target="#stations">
+                    <i class="bi bi-music-note-list"></i>
+                </button>
+                <div class="collapse navbar-collapse text-start" id="tools" ng-controller="ProcessController">
+                    <p></p>
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item" ng-class="{'d-none': !pianobarRunning}">
+                            <a class="nav-link text-body" href="#" ng-click="sendCommand('+');" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
+                                <i class="bi mx-2" ng-class="loved ? 'bi-hand-thumbs-up-fill' : 'bi-hand-thumbs-up'"></i>
+                                {{loved ? 'Loved' : 'Love song'}}
+                            </a>
+                        </li>
+                        <li class="nav-item" ng-class="{'d-none': !pianobarRunning}">
+                            <a class="nav-link text-body" href="#" ng-click="sendCommand('-');" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
+                                <i class="bi bi-hand-thumbs-down mx-2"></i>
+                                Hate song
+                            </a>
+                        </li>
+                        <li class="nav-item" ng-class="{'d-none': !pianobarRunning}">
+                            <a class="nav-link text-body" href="#" ng-click="sendCommand('t');" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
+                                <i class="bi bi-ban mx-2"></i>
+                                Ban song for one month
+                            </a>
+                        </li>
+                        <li class="nav-item" ng-class="{'d-none': !pianobarRunning}">
+                            <a class="nav-link">
+                                <i class="bi bi-dash-lg mx-2"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-body" href="#" ng-click="process(pianobarRunning ? 'stop' : 'start')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
+                                <i class="be mx-2" ng-class="pianobarRunning ? 'bi-arrow-down' : 'bi-arrow-up'"></i>
+                                {{pianobarRunning ? 'Stop pianobar' : 'Start pianobar'}}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-body" href="#" ng-click="process('system-reboot')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
+                                <i class="bi bi-arrow-clockwise mx-2"></i>
+                                Reboot device
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-body" href="#" ng-click="process('system-stop')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
+                                <i class="bi bi-power mx-2"></i>
+                                Shut down device
+                            </a>
+                        </li>
+                    </ul>
                 </div>
-            </nav>
-        </div>
-
+                <div class="collapse navbar-collapse text-center" id="stations" ng-controller="StationController">
+                    <p></p>
+                    <button type="button"
+                            class="btn m-1"
+                            ng-class="stationName == station.name ? 'btn-light' : 'btn-outline-light'"
+                            ng-repeat="station in stations"
+                            ng-click="stationName == station.name || changeStation(station.id);"
+                            data-bs-toggle="collapse"
+                            data-bs-target=".navbar-collapse.show">
+                        {{station.name}}
+                    </button>
+                </div>
+            </div>
+        </nav>
         <script src="/socket.io/socket.io.js"></script>
         <script src="/js/jquery-2.1.1.min.js"></script>
         <script src="/js/angular.min.js"></script>
         <script src="/js/bootstrap.min.js"></script>
         <script src="/js/main.js"></script>
         <script>
-            // Set bootstrap's global light/dark mode based on browser 
-            // preference and set the opposite for the navbar.
-            if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-                document.querySelector("html").setAttribute("data-bs-theme", "dark");
+            // Set bootstrap's global light/dark mode based on browser.
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.querySelector('html').setAttribute('data-bs-theme', 'dark');
             };
-
             // Collapse all menus when/before another one is opened.
             jQuery('button').click(
                 function(e) {

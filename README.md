@@ -57,9 +57,18 @@ systemctl --user start patiobar
 Connect to your device's IP address in your web browser to access
 Patiobar.
 
+If you would like shutdown/reboot controls to work, then the user
+account which is running patiobar will need passwordless access to the
+`reboot` and `shutdown` commands. Run `sudo visudo` to open the sudoers
+file and add the following line to the end, replacing `myuser` with the
+appropriate username:
+
+```
+myuser ALL=(ALL) NOPASSWD:/usr/sbin/reboot,/usr/sbin/shutdown
+```
+
 ## Screenshots
 
-![light mode screenshot](https://i.imgur.com/stkB8dG.jpeg)
-![dark mode screenshot](https://i.imgur.com/q5S5XgN.jpeg)
-![tools menu screenshot](https://i.imgur.com/X3r9q3u.jpeg)
-![station menu screenshot](https://i.imgur.com/ICdVnDV.jpeg)
+![screenshot](https://i.imgur.com/0ENDwvw.jpeg)
+![tools menu screenshot](https://i.imgur.com/2lhFC4I.jpeg)
+![station menu screenshot](https://i.imgur.com/yym1moG.jpeg)
