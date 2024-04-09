@@ -182,6 +182,7 @@ function SongController($scope, socket) {
 		$scope.title = 'pianobar is turned off.';
 		$scope.artist = '';
 		$scope.rating = 0;
+		$scope.src = '';
 	});
 
 	socket.on('volume', function(msg){
