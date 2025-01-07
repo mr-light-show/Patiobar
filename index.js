@@ -145,12 +145,16 @@ function volume(action) {
 }
 
 function setVolume() {
-	if (newVolume != currentVolume) {
-		currentVolume = newVolume;
-  	const setVolume = " " + (Math.floor((volumeMax - volumeMin) * (currentVolume / 100)) + volumeMin);
-    console.info(child_process.execSync(volumeSetCtl + setVolume).toString());
-    console.info('volume set to '+setVolume+" ("+currentVolume+"%)");
-	}
+    try {
+	    if (newVolume != currentVolume) {
+            currentVolume = newVolume;
+            const setVolume = " " + (Math.floor((volumeMax - volumeMin) * (currentVolume / 100)) + volumeMin);
+            console.info(child_process.execSync(volumeSetCtl + setVolume).toString());
+            console.info('volume set to '+setVolume+" ("+currentVolume+"%)");
+	    }
+    } catch(e) {
+        console.error(e);
+    }
 }
 
 function PidoraCTL(action) {
@@ -309,6 +313,69 @@ function removeSocket(socket, user_id) {
     }
 }
 
+
+app.post('/ha', (req, res) => {
+    switch (req.query.action) {
+      case 'pause':
+        PidoraCTL('S');
+        break;
+      case 'play':
+        PidoraCTL('P');
+        break;
+      case 'next':
+        PidoraCTL('n');
+        break;
+      default:
+        res.status(400).send(400, "invalid action="+req.query.action+"\n[pause|play|next]\n");
+        return;
+    }
+    res.status(200).send("action="+req.query.action+"\n");
+  });
+
+// triggered by eventcmd.sh or other external drivers
+app.post('/start', function (request, response) {
+    const artist = request.query.artist;
+    const title = request.query.title;
+    const album = request.query.album;
+    const coverArt = request.query.coverArt;
+    const rating = request.query.rating;
+    const stationName = request.query.stationName;
+    const songStationName = request.query.songStationName;
+    io.emit('stations', readStations());
+    if (!isPianobarPlaying()) PidoraCTL('P');  // if paused, start playing
+    io.emit('start', {
+        artist: artist,
+        title: title,
+        album: album,
+        coverArt: coverArt,
+        rating: rating,
+        stationName: stationName,
+        songStationName: songStationName,
+        isplaying: isPianobarPlaying(),
+        isrunning: isPianobarRunning()
+    });
+    inactivity = 0;
+    response.send(request.query);
+});
+
+app.post('/lovehate', function (request, response) {   // is there a need for f(request, response)
+    inactivity = 0;
+    const rating = request.query.rating;
+    io.emit('lovehate', {rating: rating});
+    console.log(request.query);
+    response.send(request.query);
+});
+
+app.get('/inactivity', function (request, response) {
+    inactivityTracker();
+    response.send("Inactivity: " + inactivity + "/" + inactivityThreshold + " minutes.\n");
+});
+
+app.get('/refresh', function (request, response) {
+    refresh();
+    response.send('refreshed clients\n');
+});
+
 io.on('connection', function (socket) {
     // remotePort is often Wrong (or at least seemed to be with old library)
     const user_id = socket.request.connection.remoteAddress + ':' + socket.request.connection.remotePort + ' | ' + socket.id;
@@ -395,50 +462,6 @@ io.on('connection', function (socket) {
         const cmd = 's' + stationId + '\n';
         PidoraCTL(cmd);
         refresh();
-    });
-
-    app.get('/inactivity', function (request, response) {
-        inactivityTracker();
-        response.send("Inactivity: " + inactivity + "/" + inactivityThreshold + " minutes.\n");
-    });
-
-    app.get('/refresh', function (request, response) {
-        refresh();
-        response.send('refreshed clients\n');
-    });
-
-    // triggered by eventcmd.sh or other external drivers
-    app.post('/start', function (request, response) {
-        const artist = request.query.artist;
-        const title = request.query.title;
-        const album = request.query.album;
-        const coverArt = request.query.coverArt;
-        const rating = request.query.rating;
-        const stationName = request.query.stationName;
-        const songStationName = request.query.songStationName;
-        io.emit('stations', readStations());
-        if (!isPianobarPlaying()) PidoraCTL('P');  // if paused, start playing
-        io.emit('start', {
-            artist: artist,
-            title: title,
-            album: album,
-            coverArt: coverArt,
-            rating: rating,
-            stationName: stationName,
-            songStationName: songStationName,
-            isplaying: isPianobarPlaying(),
-            isrunning: isPianobarRunning()
-        });
-        inactivity = 0;
-        response.send(request.query);
-    });
-
-    app.post('/lovehate', function (request, response) {   // is there a need for f(request, response)
-        inactivity = 0;
-        const rating = request.query.rating;
-        io.emit('lovehate', {rating: rating});
-        console.log(request.query);
-        response.send(request.query);
     });
 
 });

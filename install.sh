@@ -71,8 +71,10 @@ EOF
 			exit 1
         fi
     else
-        echo "${configdir}/config already exists"
-		echo "You will need to manually update that file."
+		echo event_command = ${event_command} >>${configdir}/config
+		echo fifo = ${fifo} >>${configdir}/config
+		echo "${configdir}/config already exists"
+		echo "You may need to manually update that file."
 		exit
     fi
 else
