@@ -18,6 +18,7 @@ require('console-stamp')(console, {
 let inactivity = 0;
 let currentVolume = 0;
 let newVolume = 0;
+
 const
     inactivityThreshold = 30, // minutes
     express = require('express'),
@@ -33,8 +34,10 @@ const
     patiobarCtl = process.env.HOME + '/Patiobar/patiobar.sh',
     stationList = process.env.HOME + "/.config/pianobar/stationList",
 
-    volumeGetCtl = "/usr/bin/amixer sget 'Master'",
-    volumeSetCtl = "/usr/bin/amixer sset 'Master' ",
+    mixerControlName = getDefaultMixerControlName(),
+    volumeGetCtl = `/usr/bin/amixer sget '${mixerControlName}'`,
+    volumeSetCtl = `/usr/bin/amixer sset '${mixerControlName}' `,
+
     volumeRegEx = /Front Left: Playback (\d+)/,
     volumeMax = 65536,
     volumeMin = 0,
@@ -46,6 +49,35 @@ const
 
 // Routing
 app.use(express.static(__dirname + '/views'));
+
+/**
+ * Executes the 'amixer' command to determine the default mixer control name.
+ * @returns {string} The name of the default mixer control (e.g., "Digital", "PCM", "Master").
+ * @throws {Error} If the amixer command fails or the control name cannot be found.
+ */
+function getDefaultMixerControlName() {
+  try {
+    // Run 'amixer' with no arguments to get the default mixer's controls.
+    // execSync returns a Buffer, so we convert it to a string.
+    const stdout = execSync('amixer').toString();
+
+    // Regex to find a line starting with "Simple mixer control" and capture the control name.
+    const regex = /Simple mixer control '([^']*)'/;
+    const match = stdout.match(regex);
+
+    if (match && match.length > 1) {
+      // The captured control name is in the first capturing group.
+      const controlName = match[1];
+      return controlName;
+    } else {
+      throw new Error('Could not find a valid mixer control in amixer output.');
+    }
+  } catch (error) {
+    // If execSync fails, it throws an error.
+    throw new Error(`Failed to execute amixer command: ${error.message}`);
+  }
+}
+
 
 function isPianobarPlaying() {
     return !fs.existsSync(pausePlayTouchFile);
@@ -96,7 +128,7 @@ function readCurrentSong() {
 
 function clearFIFO() {
     try {
-        child_process.spawnSync('dd', ['if=', fifo, 'iflag=nonblock', 'of=/dev/null']);
+        child_process.spawnSync('dd', [`if=${fifo}`, 'iflag=nonblock', 'of=/dev/null']);
     } catch (err) {
         console.error('EAGAIN type errors happen often (resource not available): ' + err.message);
     }
@@ -128,7 +160,7 @@ function volume(action) {
             }
             break;
         case 'down':
-            if (currentVolume > 0 || newvolume > 0) {
+            if (currentVolume > 0 || newVolume > 0) {
                 newVolume--;
             }
             break;
@@ -168,7 +200,7 @@ function PidoraCTL(action) {
             return;
         }
 
-        const buf = new Buffer.from(action);
+        const buf = Buffer.from(action);
         fs.write(fd, buf, 0, action.length, null, function (error, written) {  // is there a need for f(error, written, buffer)
             if (fd) {
                 fs.close(fd, function (err) {
@@ -454,7 +486,7 @@ io.on('connection', function (socket) {
 
     socket.on('changeStation', function (data) {
         if (!isPianobarRunning()) {
-            console.warn("changeStation startign pianobar");
+            console.warn("changeStation starting pianobar");
             ProcessCTL('start');
         }
         console.info('User request:', data, user_id);
