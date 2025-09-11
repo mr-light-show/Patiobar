@@ -37,10 +37,16 @@ const
     mixerControlName = getDefaultMixerControlName(),
     volumeGetCtl = `/usr/bin/amixer sget '${mixerControlName}'`,
     volumeSetCtl = `/usr/bin/amixer sset '${mixerControlName}' `,
+    volumeMax = mixerControlName === 'Digital' ? 190 :
+                mixerControlName === 'Master' ? 65536 :
+                mixerControlName === 'PCM' ? 65536 :
+                 65536,
+    volumeMin = mixerControlName === 'Digital' ? 70 :
+                mixerControlName === 'Master' ? 0 :
+                mixerControlName === 'PCM' ? 0 :
+                0,
 
     volumeRegEx = /Front Left: Playback (\d+)/,
-    volumeMax = 65536,
-    volumeMin = 0,
 
     pianobarOffImageURL = '',
 
@@ -59,7 +65,7 @@ function getDefaultMixerControlName() {
   try {
     // Run 'amixer' with no arguments to get the default mixer's controls.
     // execSync returns a Buffer, so we convert it to a string.
-    const stdout = execSync('amixer').toString();
+    const stdout = child_process.execSync('amixer').toString();
 
     // Regex to find a line starting with "Simple mixer control" and capture the control name.
     const regex = /Simple mixer control '([^']*)'/;
