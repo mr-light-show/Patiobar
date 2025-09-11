@@ -2,31 +2,16 @@
 set -euo pipefail
 
 tls_fingerprint=`openssl s_client -connect tuner.pandora.com:443 < /dev/null 2> /dev/null | openssl x509 -noout -fingerprint | tr -d ':' | cut -d'=' -f2`
-repo='https://github.com/kylejohnson/Patiobar.git'
-clone_path="$HOME/Patiobar"
-event_command=${clone_path}/eventcmd.sh
-fifo=${clone_path}/ctl
+event_command=${PWD}/eventcmd.sh
+fifo=${PWD}/ctl
 configdir=~/.config/pianobar
+systemd_unit="patiobar.service"
+systemd_unit_path=~/.config/systemd/user
+systemd_unit_fullname="${systemd_unit_path}/${systemd_unit}"
 
 if ! which npm &> /dev/null; then
-    echo "npm is not installed!"
-    echo "Installing NPM is beyond the scope of this installer as methods vary by distro, OS and preference."
-    echo "Note that NPM is usually installed with Node.js."
-    echo "https://nodejs.org/en/download/ is a decent place to start."
+	echo "npm is not installed. Exiting."
     exit 1
-fi
-
-# Don't clone if already in the repo
-if [ ! -d $clone_path ]; then
-	echo "Cloning $repo in to $clone_path"
-	if git clone "${repo}" "${clone_path}"; then
-		cd "${clone_path}"
-	else
-		echo "Could not clone ${repo}"
-		exit 1
-	fi
-else
-	echo "$repo already exists at $clone_path.  Moving on."
 fi
 
 # Install node packages
@@ -48,7 +33,7 @@ if [ ! -p "${fifo}" ]; then
 		exit 1
 	fi
 else
-	echo "Control file already exists.  Moving on."
+	echo "Control file already exists. Moving on."
 fi
 
 
@@ -68,16 +53,47 @@ EOF
 			echo "You will need to edit ${configdir}/config with your Pandora username and password."
         else
             echo "failure"
-			exit 1
         fi
     else
-		echo event_command = ${event_command} >>${configdir}/config
-		echo fifo = ${fifo} >>${configdir}/config
-		echo "${configdir}/config already exists"
-		echo "You may need to manually update that file."
-		exit
+        echo "${configdir}/config already exists"
+		echo "You will need to manually update that file."
     fi
 else
 	echo "Failed to create $configdir."
-	exit 1
 fi
+
+# Create systemd user folder if it does not exist.
+mkdir -p "${systemd_unit_path}"
+
+# Create patiobar.service file if it does not exist.
+if [ ! -f "${systemd_unit_fullname}" ]; then
+	echo "Creating ${systemd_unit} at ${systemd_unit_path}."
+	echo "[Unit]
+Description=Patiobar and Pianobar for Pandora.com streaming.
+
+[Service]
+Type=forking
+RemainAfterExit=yes
+WorkingDirectory=${PWD}
+ExecStart=/usr/bin/bash -c \"${PWD}/patiobar.sh start\"
+ExecStop=/usr/bin/bash -c \"${PWD}/patiobar.sh stop\"
+ExecReload=/usr/bin/bash -c \"${PWD}/patiobar.sh restart\"
+
+[Install]
+WantedBy=default.target" >> "${systemd_unit_fullname}"
+else
+	echo "${systemd_unit_fullname} already exists."
+fi
+
+# Enable pianobar.service
+echo "Enabling ${systemd_unit}..."
+systemctl --user enable "${systemd_unit}"
+
+# Enable lingering for current user.
+# This means systemd user units will start on boot rather than login.
+echo "Enabling user lingering so that systemd units start on boot."
+loginctl enable-linger
+
+echo "Done! Patiobar will start on next boot, or start it now with"
+echo "  systemctl --user start patiobar.service"
+echo "Don't forget to update your pianobar config if necessary."

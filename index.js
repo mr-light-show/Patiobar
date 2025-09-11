@@ -18,6 +18,7 @@ require('console-stamp')(console, {
 let inactivity = 0;
 let currentVolume = 0;
 let newVolume = 0;
+
 const
     inactivityThreshold = 30, // minutes
     express = require('express'),
@@ -33,19 +34,56 @@ const
     patiobarCtl = process.env.HOME + '/Patiobar/patiobar.sh',
     stationList = process.env.HOME + "/.config/pianobar/stationList",
 
-    volumeGetCtl = "/usr/bin/amixer sget 'Digital'",
-    volumeSetCtl = "/usr/bin/amixer sset 'Digital' ",
-    volumeRegEx = /Front Left: Playback (\d+)/,
-    volumeMax = 190,
-    volumeMin = 70,
+    mixerControlName = getDefaultMixerControlName(),
+    volumeGetCtl = `/usr/bin/amixer sget '${mixerControlName}'`,
+    volumeSetCtl = `/usr/bin/amixer sset '${mixerControlName}' `,
+    volumeMax = mixerControlName === 'Digital' ? 190 :
+                mixerControlName === 'Master' ? 65536 :
+                mixerControlName === 'PCM' ? 65536 :
+                 65536,
+    volumeMin = mixerControlName === 'Digital' ? 70 :
+                mixerControlName === 'Master' ? 0 :
+                mixerControlName === 'PCM' ? 0 :
+                0,
 
-    pianobarOffImageURL = 'images/On_Off.png',
+    volumeRegEx = /Front Left: Playback (\d+)/,
+
+    pianobarOffImageURL = '',
 
     currentSongFile = '/run/user/1000/currentSong',
     pausePlayTouchFile = '/run/user/1000/pause'; // perhaps this should move to ./config/patiobar/pause
 
 // Routing
 app.use(express.static(__dirname + '/views'));
+
+/**
+ * Executes the 'amixer' command to determine the default mixer control name.
+ * @returns {string} The name of the default mixer control (e.g., "Digital", "PCM", "Master").
+ * @throws {Error} If the amixer command fails or the control name cannot be found.
+ */
+function getDefaultMixerControlName() {
+  try {
+    // Run 'amixer' with no arguments to get the default mixer's controls.
+    // execSync returns a Buffer, so we convert it to a string.
+    const stdout = child_process.execSync('amixer').toString();
+
+    // Regex to find a line starting with "Simple mixer control" and capture the control name.
+    const regex = /Simple mixer control '([^']*)'/;
+    const match = stdout.match(regex);
+
+    if (match && match.length > 1) {
+      // The captured control name is in the first capturing group.
+      const controlName = match[1];
+      return controlName;
+    } else {
+      throw new Error('Could not find a valid mixer control in amixer output.');
+    }
+  } catch (error) {
+    // If execSync fails, it throws an error.
+    throw new Error(`Failed to execute amixer command: ${error.message}`);
+  }
+}
+
 
 function isPianobarPlaying() {
     return !fs.existsSync(pausePlayTouchFile);
@@ -96,7 +134,7 @@ function readCurrentSong() {
 
 function clearFIFO() {
     try {
-        child_process.spawnSync('dd', ['if=', fifo, 'iflag=nonblock', 'of=/dev/null']);
+        child_process.spawnSync('dd', [`if=${fifo}`, 'iflag=nonblock', 'of=/dev/null']);
     } catch (err) {
         console.error('EAGAIN type errors happen often (resource not available): ' + err.message);
     }
@@ -128,8 +166,8 @@ function volume(action) {
             }
             break;
         case 'down':
-            if (currentVolume > 0 || newvolume > 0) {
-            	newVolume--;
+            if (currentVolume > 0 || newVolume > 0) {
+                newVolume--;
             }
             break;
         case 'get':
@@ -168,7 +206,7 @@ function PidoraCTL(action) {
             return;
         }
 
-        const buf = new Buffer.from(action);
+        const buf = Buffer.from(action);
         fs.write(fd, buf, 0, action.length, null, function (error, written) {  // is there a need for f(error, written, buffer)
             if (fd) {
                 fs.close(fd, function (err) {
@@ -211,12 +249,12 @@ function ProcessCTL(action) {
     switch (action) {
         case 'start':
             if (!isPianobarRunning()) {
-                io.emit('volume', volume('50'));
+                io.emit('volume', volume('25'));
                 console.info('Starting Pianobar');
                 // pianobar starts in the running state, unless work is done to force it otherwise
                 // but wait for the first start message to change the playing from false to true
                 const songStatus = Object.assign(songTemplate, {
-                    title: 'Warming up',
+                    title: 'pianobar is starting...',
                     artist: ' ',
                     isplaying: false,
                     isrunning: false
@@ -454,7 +492,7 @@ io.on('connection', function (socket) {
 
     socket.on('changeStation', function (data) {
         if (!isPianobarRunning()) {
-            console.warn("changeStation startign pianobar");
+            console.warn("changeStation starting pianobar");
             ProcessCTL('start');
         }
         console.info('User request:', data, user_id);
@@ -546,6 +584,6 @@ process.on('SIGHUP', function () {
     });
 });
 console.info(patiobarCtl);
-volume("50");
+volume("25");
 // start the server after all other code is in place
 server.listen(listenPort);
