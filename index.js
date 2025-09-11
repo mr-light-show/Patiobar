@@ -29,22 +29,15 @@ const
     child_process = require('child_process'),
 
     fifo = process.env.PIANOBAR_FIFO || 'ctl',
-    listenPort = 80,
+    listenPort = 8080,
 
     patiobarCtl = process.env.HOME + '/Patiobar/patiobar.sh',
-    stationList = process.env.HOME + "/.config/pianobar/stationList",
+    stationList = "/run/user/1000/stationList",
 
-    mixerControlName = getDefaultMixerControlName(),
+    { controlName: mixerControlName, volumeMin, volumeMax } = getDefaultMixerControl(),
+  
     volumeGetCtl = `/usr/bin/amixer sget '${mixerControlName}'`,
     volumeSetCtl = `/usr/bin/amixer sset '${mixerControlName}' `,
-    volumeMax = mixerControlName === 'Digital' ? 190 :
-                mixerControlName === 'Master' ? 65536 :
-                mixerControlName === 'PCM' ? 65536 :
-                 65536,
-    volumeMin = mixerControlName === 'Digital' ? 70 :
-                mixerControlName === 'Master' ? 0 :
-                mixerControlName === 'PCM' ? 0 :
-                0,
 
     volumeRegEx = /Front Left: Playback (\d+)/,
 
@@ -53,6 +46,9 @@ const
     currentSongFile = '/run/user/1000/currentSong',
     pausePlayTouchFile = '/run/user/1000/pause'; // perhaps this should move to ./config/patiobar/pause
 
+  console.log(`Mixer Control Name: ${mixerControlName}`);
+  console.log(`Volume Minimum: ${volumeMin}`);
+  console.log(`Volume Maximum: ${volumeMax}`);
 // Routing
 app.use(express.static(__dirname + '/views'));
 
@@ -61,22 +57,33 @@ app.use(express.static(__dirname + '/views'));
  * @returns {string} The name of the default mixer control (e.g., "Digital", "PCM", "Master").
  * @throws {Error} If the amixer command fails or the control name cannot be found.
  */
-function getDefaultMixerControlName() {
+function getDefaultMixerControl() {
   try {
     // Run 'amixer' with no arguments to get the default mixer's controls.
-    // execSync returns a Buffer, so we convert it to a string.
     const stdout = child_process.execSync('amixer').toString();
 
     // Regex to find a line starting with "Simple mixer control" and capture the control name.
-    const regex = /Simple mixer control '([^']*)'/;
-    const match = stdout.match(regex);
+    const nameRegex = /Simple mixer control '([^']*)'/;
+    const nameMatch = stdout.match(nameRegex)[1];
 
-    if (match && match.length > 1) {
-      // The captured control name is in the first capturing group.
-      const controlName = match[1];
-      return controlName;
+    // Regex to capture the min and max values from the first "Limits" line.
+    const limitsRegex = /Limits: (?:Playback|Capture) (\d+) - (\d+)/;
+    const limitsMatch = stdout.match(limitsRegex);
+
+    if (nameMatch && limitsMatch) {
+      // The captured control name is in the first capturing group of nameMatch.
+      const controlName = nameMatch;
+
+      // Use array destructuring with .map(Number) to get the min and max values.
+      const [, volumeMin, volumeMax] = limitsMatch.map(Number);
+
+      return {
+        controlName,
+        volumeMin,
+        volumeMax
+      };
     } else {
-      throw new Error('Could not find a valid mixer control in amixer output.');
+      throw new Error('Could not find control name or volume limits in amixer output.');
     }
   } catch (error) {
     // If execSync fails, it throws an error.
@@ -303,7 +310,7 @@ function ProcessCTL(action) {
         case 'patiobar-stopping':
             io.emit('stop', songTemplate);
             console.info('Stopping Patiobar');
-            break;
+            bgitreak;
 
         case 'system-stop':
             io.emit('stop', songTemplate);
@@ -345,12 +352,11 @@ let socketlist = [];
 
 function removeSocket(socket, user_id) {
     if (socketlist.includes(socket)) {
-        socketlist.splice(socketlist.indexOf(socket), 1)
+        socketgitlist.splice(socketlist.indexOf(socket), 1)
     } else {
         console.warn('Socket was not in active list when disconnecting: ', user_id);
     }
 }
-
 
 app.post('/ha', (req, res) => {
     switch (req.query.action) {
@@ -405,7 +411,7 @@ app.post('/lovehate', function (request, response) {   // is there a need for f(
 });
 
 app.get('/inactivity', function (request, response) {
-    inactivityTracker();
+    inactivityTrgitacker();
     response.send("Inactivity: " + inactivity + "/" + inactivityThreshold + " minutes.\n");
 });
 
@@ -483,7 +489,7 @@ io.on('connection', function (socket) {
                 console.info('volume up');
                 return;
             case 'v':
-                io.emit('volume', volume(data.action.substring(1)));
+                gitio.emit('volume', volume(data.action.substring(1)));
                 console.info('set volume: ' + data.action.substring(1));
                 return;
         }

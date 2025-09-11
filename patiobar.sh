@@ -13,9 +13,9 @@ pianobarStopped() {
 }
 
 isPianobarRunning() {
-  pb_pid=$(pidof pianobar)
-  [[ "$pb_pid" -eq "" ]] && pianobarStopped
-  [[ "$pb_pid" -eq "" ]] && return 0 || return 1
+  pb_pid=$(pidof -s pianobar)
+  [[ -z "$pb_pid" ]] && pianobarStopped
+  [[ -z "$pb_pid" ]] && return 0 || return 1
 }
 
 case "$1" in
@@ -37,8 +37,8 @@ case "$1" in
 				$0 start-patiobar
         pushd . > /dev/null
         cd $PIANOBAR_DIR
-        pb_pid=$(pidof pianobar)
-        [[ "$pb_pid" -eq "" ]] && echo starting pianobar && ($PIANOBAR_BIN > /dev/null 2>&1 &)
+        pb_pid=$(pidof -s pianobar)
+        [[ -z "$pb_pid" ]] && echo starting pianobar && ($PIANOBAR_BIN > /dev/null 2>&1 &)
         EXITSTATUS=$(($? + $EXITSTATUS))
 	# start in a stopped state
         echo -n 'P'>$PATIOBAR_DIR/ctl
@@ -56,8 +56,8 @@ case "$1" in
         pushd . > /dev/null
         cd $PATIOBAR_DIR
         pb_pid=$(ps -ef | grep "[n]ode index.js patiobar" | tr -s ' ' | cut -d ' ' -f2)
-#        [[ "$pb_pid" -eq "" ]] && echo starting patiobar && ($NODE_BIN index.js patiobar > ~/log 2>&1 &) 
-        [[ "$pb_pid" -eq "" ]] && echo starting patiobar && ($NODE_BIN index.js patiobar > /dev/null 2>&1 &)
+#        [[ -z "$pb_pid" ]] && echo starting patiobar && ($NODE_BIN index.js patiobar > ~/log 2>&1 &) 
+        [[ -z "$pb_pid" ]] && echo starting patiobar && ($NODE_BIN index.js patiobar > /dev/null 2>&1 &)
         EXITSTATUS=$(($? + $EXITSTATUS))
         popd > /dev/null
 				isPianobarRunning
@@ -71,7 +71,7 @@ case "$1" in
         [[ 2 -eq $(ps ax | grep -c [p]ianobar) ]] || $PIANOBAR_BIN > /dev/null &
         cd $PATIOBAR_DIR
 #        [[ 1 -eq $(ps aux | grep -v grep | grep -c index.js) ]] || nodemon index.js
-        [[ 2 -eq $(ps ax | grep -c nano patiobar) ]] && pkill -f "nano"
+        [[ 2 -eq $(ps ax | grep -c "nano patiobar") ]] && pkill -f "nano"
         nodemon index.js
         # at this point we are interactive, so exitstatus is less meaningful
         EXITSTATUS=$(($? + $EXITSTATUS))
@@ -79,11 +79,11 @@ case "$1" in
         exit "$EXITSTATUS"
         ;;
   kill)
-        pb_pid=$(pidof pianobar)
-        [[ "$pb_pid" -ne "" ]] && echo killing $2 pianobar && kill $2 $pb_pid
+        pb_pid=$(pidof -s pianobar)
+        [[ -n "$pb_pid" ]] && echo killing $2 pianobar && kill $2 $pb_pid
        	EXITSTATUS=$?
       	pb_pid=$(ps -ef | grep "[n]ode index.js patiobar" | tr -s ' ' | cut -d ' ' -f2)
-        [[ "$pb_pid" -ne "" ]] && echo stopping $2 patiobar && kill $2 $pb_pid
+        [[ -n "$pb_pid" ]] && echo stopping $2 patiobar && kill $2 $pb_pid
         EXITSTATUS=$(($? + $EXITSTATUS))
 				isPianobarRunning
         exit $EXITSTATUS
@@ -93,21 +93,22 @@ case "$1" in
         EXITSTATUS=0
         $0 stop-pianobar || EXISTSTATUS=1
         pb_pid=$(ps -ef | grep "[n]ode index.js patiobar" | tr -s ' ' | cut -d ' ' -f2)
-        [[ "$pb_pid" -ne "" ]] && echo stopping patiobar && kill $pb_pid
+        echo $pb_pid
+        [[ -n "$pb_pid" ]] && echo stopping patiobar && kill $pb_pid
         EXITSTATUS=$(($? + $EXITSTATUS))
 				isPianobarRunning
         exit $EXITSTATUS
         ;;
   stop-pianobar)
      	  EXITSTATUS=0
-        pb_pid=$(pidof pianobar)
+        pb_pid=$(pidof -s pianobar)
         # try the easy way by sending "q"uit to pianobar
-        [[ "$pb_pid" -ne "" ]] && echo quitting pianobar && echo -n 'q' > $PATIOBAR_DIR/ctl
-        [[ "$pb_pid" -ne "" ]] && sleep 5
-	      pb_pid2=$(pidof pianobar)
+        [[ -n "$pb_pid" ]] && echo quitting pianobar && echo -n 'q' > $PATIOBAR_DIR/ctl
+        [[ -n "$pb_pid" ]] && sleep 5
+	      pb_pid2=$(pidof -s pianobar)
 	      # still there?  killit
-	      [[ "$pb_pid2" -ne "" ]] && echo killing pianobar && kill $pb_pid2 && EXITSTATUS=$?
-				isPianobarRunning
+	      [[ -n "$pb_pid2" ]] && echo killing pianobar && kill $pb_pid2 && EXITSTATUS=$?
+	 			isPianobarRunning
         exit $EXITSTATUS
         ;;
   restart|force-reload)
@@ -121,10 +122,10 @@ case "$1" in
         # more of a list than a status, since this doesn't check values
         EXITSTATUS=0
         pb_pid=$(ps -ef | grep "[n]ode index.js patiobar" | tr -s ' ' | cut -d ' ' -f2)
-        EXITSTATUS=$([[ "$pb_pid" -eq "" ]] && echo 0 || echo 1)
+        EXITSTATUS=$([[ -z "$pb_pid" ]] && echo 0 || echo 1)
         [[ $EXITSTATUS  -eq 0 ]] || echo patiobar is running - $pb_pid
-        pb_pid=$(pidof pianobar)
-        EXITSTATUS=$([[ "$pb_pid" -eq "" ]] && echo 0 || echo 1)
+        pb_pid=$(pidof -s pianobar)
+        EXITSTATUS=$([[ -z "$pb_pid" ]] && echo 0 || echo 1)
         [[ $EXITSTATUS  -eq 0 ]] || echo pianobar is running - $pb_pid
 				isPianobarRunning
         cat $CURRENT_SONG
@@ -136,8 +137,8 @@ case "$1" in
   status-pianobar)
   			isPianobarRunning
         EXITSTATUS=$?
-#        pb_pid=$(pidof pianobar)
-#        EXITSTATUS=$([[ "$pb_pid" -eq "" ]] && echo 0 || echo 1)
+#        pb_pid=$(pidof -s pianobar)
+#        EXITSTATUS=$([[ -z "$pb_pid" ]] && echo 0 || echo 1)
 #        [[ $EXITSTATUS  -eq 0 ]] || echo $pb_pid
         exit $EXITSTATUS
         ;;
