@@ -29,7 +29,7 @@ const
     child_process = require('child_process'),
 
     fifo = process.env.PIANOBAR_FIFO || 'ctl',
-    listenPort = 8080,
+    listenPort = 80,
 
     patiobarCtl = process.env.HOME + '/Patiobar/patiobar.sh',
     stationList = "/run/user/1000/stationList",
@@ -378,6 +378,7 @@ app.post('/ha', (req, res) => {
 
 // triggered by eventcmd.sh or other external drivers
 app.post('/start', function (request, response) {
+    console.info("start: "+request);
     const artist = request.query.artist;
     const title = request.query.title;
     const album = request.query.album;
@@ -489,7 +490,7 @@ io.on('connection', function (socket) {
                 console.info('volume up');
                 return;
             case 'v':
-                gitio.emit('volume', volume(data.action.substring(1)));
+                io.emit('volume', volume(data.action.substring(1)));
                 console.info('set volume: ' + data.action.substring(1));
                 return;
         }
@@ -522,8 +523,8 @@ function notifyStopped() {
 }
 
 function refresh() {
-		const isRunning = isPianobarRunning(false);
-		if (isRunning) {
+	const isRunning = isPianobarRunning(false);
+	if (isRunning) {
 			inactivity = 0;
     }
     io.emit(isRunning ? 'start' : 'stop', readCurrentSong());

@@ -22,10 +22,10 @@ Debian 12 "Bookworm" in a virtual environment. I run this under a normal
 lingering to start it at boot. If you are using Raspbian/Debian 11 or
 12, these steps should work for you:
 
-Install git, pianobar, and npm:
+Install git, pianobar, curl, and npm:
 
 ```bash
-sudo apt install git npm pianobar
+sudo apt install git curl npm pianobar
 ```
 
 To allow node to bind to port 80:
