@@ -310,7 +310,7 @@ function ProcessCTL(action) {
         case 'patiobar-stopping':
             io.emit('stop', songTemplate);
             console.info('Stopping Patiobar');
-            bgitreak;
+            break;
 
         case 'system-stop':
             io.emit('stop', songTemplate);
@@ -352,7 +352,7 @@ let socketlist = [];
 
 function removeSocket(socket, user_id) {
     if (socketlist.includes(socket)) {
-        socketgitlist.splice(socketlist.indexOf(socket), 1)
+        socketlist.splice(socketlist.indexOf(socket), 1)
     } else {
         console.warn('Socket was not in active list when disconnecting: ', user_id);
     }
@@ -412,7 +412,7 @@ app.post('/lovehate', function (request, response) {   // is there a need for f(
 });
 
 app.get('/inactivity', function (request, response) {
-    inactivityTrgitacker();
+    inactivityTracker();
     response.send("Inactivity: " + inactivity + "/" + inactivityThreshold + " minutes.\n");
 });
 
