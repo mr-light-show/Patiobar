@@ -32,7 +32,7 @@ const
     listenPort = 80,
 
     patiobarCtl = process.env.HOME + '/Patiobar/patiobar.sh',
-    stationList = "/run/user/1000/stationList",
+    stationList = process.env.HOME + '/.config/pianobar/stationList',
 
     { controlName: mixerControlName, volumeMin, volumeMax } = getDefaultMixerControl(),
   
@@ -378,7 +378,7 @@ app.post('/ha', (req, res) => {
 
 // triggered by eventcmd.sh or other external drivers
 app.post('/start', function (request, response) {
-    console.info("start: "+request);
+    console.info("start: "+request.query.songStationName);
     const artist = request.query.artist;
     const title = request.query.title;
     const album = request.query.album;
