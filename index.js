@@ -28,7 +28,7 @@ const
     fs = require('fs'),
     child_process = require('child_process'),
 
-    fifo = process.env.PIANOBAR_FIFO || 'ctl',
+    fifo = process.env.HOME + '/Patiobar/ctl',
     listenPort = 80,
 
     patiobarCtl = process.env.HOME + '/Patiobar/patiobar.sh',
@@ -49,6 +49,7 @@ const
   console.log(`Mixer Control Name: ${mixerControlName}`);
   console.log(`Volume Minimum: ${volumeMin}`);
   console.log(`Volume Maximum: ${volumeMax}`);
+  console.log(`fifo: ${fifo}`);
 // Routing
 app.use(express.static(__dirname + '/views'));
 
@@ -268,7 +269,8 @@ function ProcessCTL(action) {
                 });
                 io.emit('start', songStatus);
             } else {
-                console.info('Pianobar is already running');
+                console.info('Pianobar is already running - start playing');
+                PidoraCTL('P');
                 return;
             }
 

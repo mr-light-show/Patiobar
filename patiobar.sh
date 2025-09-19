@@ -6,6 +6,7 @@ NODE_BIN=/usr/bin/node
 PATIOBAR_DIR=~/Patiobar
 CURRENT_SONG=/run/user/1000/currentSong
 STATION_LIST=~/.config/pianobar/stationList
+STATE=~/.config/pianobar/state
 
 pianobarStopped() {
   echo PIANOBAR_STOPPED,,,,>$CURRENT_SONG
@@ -40,8 +41,12 @@ case "$1" in
         pb_pid=$(pidof -s pianobar)
         [[ -z "$pb_pid" ]] && echo starting pianobar && ($PIANOBAR_BIN > /dev/null 2>&1 &)
         EXITSTATUS=$(($? + $EXITSTATUS))
-	# start in a stopped state
-        echo -n 'P'>$PATIOBAR_DIR/ctl
+        if [[ ! -f $STATE ]]; then
+          echo no state file choose the quick mix station
+          echo -n 'Q\n'>$PATIOBAR_DIR/ctl
+        fi          
+	      # start in a stopped state
+        echo -n 'S'>$PATIOBAR_DIR/ctl
         EXITSTATUS=$(($? + $EXITSTATUS))
         popd > /dev/null
 				isPianobarRunning
@@ -66,6 +71,8 @@ case "$1" in
 
   testmode)
         EXITSTATUS=0
+        $0 stop
+        sleep 5
         pushd . > /dev/null
         cd $PIANOBAR_DIR
         [[ 2 -eq $(ps ax | grep -c [p]ianobar) ]] || $PIANOBAR_BIN > /dev/null &
@@ -103,7 +110,7 @@ case "$1" in
      	  EXITSTATUS=0
         pb_pid=$(pidof -s pianobar)
         # try the easy way by sending "q"uit to pianobar
-        [[ -n "$pb_pid" ]] && echo quitting pianobar && echo -n 'q' > $PATIOBAR_DIR/ctl
+        [[ -n "$pb_pid" ]] && echo quitting pianobar && echo -n '\nq' > $PATIOBAR_DIR/ctl
         [[ -n "$pb_pid" ]] && sleep 5
 	      pb_pid2=$(pidof -s pianobar)
 	      # still there?  killit
