@@ -10,6 +10,8 @@ This program was originally written by
 [Kyle Johnson](https://github.com/kylejohnson/Patiobar)
 and extended and made headless by
 [sig-tesla](https://github.com/sig-tesla/Patiobar).
+Additional contributions and improvements by
+[topkecleon](https://github.com/topkecleon/Patiobar).
 This fork modifies the installation script to create a systemd unit to
 automatically start Patiobar at boot time, for dedicated
 pianobar/Patiobar devices (such as Raspberry Pis).
@@ -37,7 +39,7 @@ sudo setcap cap_net_bind_service=+ep /usr/bin/node
 After this, you can clone the repo and use the installation script:
 
 ```bash
-git clone https://github.com/topkecleon/Patiobar
+git clone https://github.com/mr-light-show/Patiobar
 cd Patiobar
 ./install.sh
 ```
